@@ -78,10 +78,10 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
-        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: ORDER BY (.+))?", query)
+        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?", query)
         if not match:
             raise ValueError("Invalid SELECT syntax")
-        columns, table_name, where_clause, order_by_clause = match.groups()
+        columns, table_name, where_clause, group_by_clause, order_by_clause = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
@@ -117,6 +117,20 @@ class SimpleSQLDatabase:
                 if row[where_index] != where_value:
                     continue
             result.append([row[i] for i in column_indices])
+        # Group results if GROUP BY clause is present
+        if group_by_clause:
+            group_by_column = group_by_clause.strip()
+            if group_by_column not in table["columns"]:
+                raise ValueError(f"Column {group_by_column} does not exist in table {table_name}")
+            group_by_index = table["columns"].index(group_by_column)
+            grouped_result = {}
+            for row in result:
+                key = row[group_by_index]
+                if key not in grouped_result:
+                    grouped_result[key] = []
+                grouped_result[key].append(row)
+            result = [group for group in grouped_result.values()]
+
         # Sort results if ORDER BY clause is present
         if order_by_clause:
             order_by_column = order_by_clause.strip()
