@@ -2,7 +2,7 @@
 name = "zerokdb"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <lolo.tomaz@gmail.com>"]
+authors = ["AE Studio <lorenzo.tomaz@ae.studio>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

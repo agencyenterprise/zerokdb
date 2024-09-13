@@ -12,10 +12,10 @@ ZeroKDB is a lightweight, file-based database system with support for basic SQL 
 
 ## Installation
 
-To install the necessary dependencies, use the following command:
+To install the necessary dependencies using Poetry, use the following command:
 
 ```bash
-pip install -r requirements.txt
+poetry install
 ```
 
 ## Usage
