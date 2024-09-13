@@ -1,3 +1,4 @@
+from change_tracker import ChangeTracker
 from simple_sql_db import SimpleSQLDatabase
 from file_storage import FileStorage
 from ipfs_storage import IPFSStorage
@@ -10,7 +11,8 @@ class DatabaseAPI:
         elif storage_type == 'ipfs':
             self.storage = IPFSStorage()
             raise ValueError("Unsupported storage type")
-        self.db = SimpleSQLDatabase(self.storage)
+        self.change_tracker = ChangeTracker()
+        self.db = SimpleSQLDatabase(self.storage, self.change_tracker)
         self.text_to_embedding = TextToEmbedding()
 
     def create_table(self, table_name, columns):

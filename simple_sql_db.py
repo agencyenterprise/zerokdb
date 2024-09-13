@@ -3,12 +3,15 @@ import datetime
 import numpy as np
 
 class SimpleSQLDatabase:
-    def __init__(self, storage):
+    def __init__(self, storage, change_tracker=None):
         self.storage = storage
+        self.change_tracker = change_tracker
         self.tables = self.storage.load()
 
     def execute(self, query):
         query = query.strip()
+        if self.change_tracker:
+            self.change_tracker.log_change(query, self.tables)
         if query.startswith("CREATE TABLE"):
             self._create_table(query)
             self.storage.save(self.tables)
