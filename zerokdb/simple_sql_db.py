@@ -137,7 +137,11 @@ class SimpleSQLDatabase:
         # Parse WHERE clause if present
         where_condition = None
         if where_clause:
-            where_match = re.match(r"(\w+) = (.+)", where_clause)
+            where_column = where_clause.split('=')[0].strip()
+            if table["column_types"][where_column] == "int":
+                where_match = re.match(r"(\w+) = (\d+)", where_clause)
+            else:
+                where_match = re.match(r"(\w+) = '(.+)'", where_clause)
             if not where_match:
                 raise ValueError("Invalid WHERE syntax")
             where_column, where_value = where_match.groups()
