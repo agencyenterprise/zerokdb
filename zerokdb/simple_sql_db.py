@@ -223,11 +223,6 @@ class SimpleSQLDatabase:
             similarities.sort(key=lambda x: x[1], reverse=True)
             for row, similarity in similarities:
                 print(f"Row: {row}, Similarity: {similarity}")
-            result = [[row[i] for i in column_indices] for row, _ in similarities]
-
-        # Apply LIMIT clause if present
-        if limit_clause:
-            limit = int(limit_clause)
-            result = result[:limit]
+            result = [[row[i] for i in column_indices] for row, _ in similarities[:int(limit_clause)]]
 
         return result
