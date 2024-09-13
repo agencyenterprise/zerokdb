@@ -57,17 +57,26 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
-        match = re.match(r"SELECT (.+) FROM (\w+)", query)
+        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?", query)
         if not match:
             raise ValueError("Invalid SELECT syntax")
-        columns, table_name = match.groups()
+        columns, table_name, where_clause = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         table = self.tables[table_name]
-        if columns == ["*"]:
-            columns = table["columns"]
         column_indices = [table["columns"].index(col) for col in columns]
+
+        # Parse WHERE clause if present
+        where_condition = None
+        if where_clause:
+            where_match = re.match(r"(\w+) = '(.+)'", where_clause)
+            if not where_match:
+                raise ValueError("Invalid WHERE syntax")
+            where_column, where_value = where_match.groups()
+            if where_column not in table["columns"]:
+                raise ValueError(f"Column {where_column} does not exist in table {table_name}")
+            where_condition = (where_column, where_value)
         if columns == ["*"]:
             columns = table["columns"]
         column_indices = [table["columns"].index(col) for col in columns]
@@ -81,5 +90,10 @@ class SimpleSQLDatabase:
                     result.append([row[i] for i in column_indices])
             return result
         for row in table["rows"]:
+            if where_condition:
+                where_column, where_value = where_condition
+                where_index = table["columns"].index(where_column)
+                if row[where_index] != where_value:
+                    continue
             result.append([row[i] for i in column_indices])
         return result
