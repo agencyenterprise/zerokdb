@@ -24,6 +24,7 @@ class SimpleSQLDatabase:
 
         elif query.startswith("CREATE INDEX"):
             self._create_index(query)
+        else:
             raise ValueError("Unsupported SQL command")
 
     def _create_table(self, query):
@@ -100,6 +101,7 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
+    def _select(self, query):
         match = re.match(
             r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?",
             query,
