@@ -133,6 +133,11 @@ class SimpleSQLDatabase:
         if columns == ["*"]:
             columns = table["columns"]
         column_indices = [table["columns"].index(col) for col in columns]
+        if cosine_similarity_clause:
+            vector_column, _ = cosine_similarity_clause.split(" WITH ")
+            if vector_column not in columns:
+                columns.append(vector_column)
+                column_indices.append(table["columns"].index(vector_column))
 
         # Parse WHERE clause if present
         where_condition = None
