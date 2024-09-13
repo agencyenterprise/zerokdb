@@ -15,7 +15,7 @@ class SimpleSQLDatabase:
     ):
         self.storage = storage
         self.change_tracker = change_tracker
-        self.tables = self.storage.load()
+        self.tables = self.storage.load() or {}
 
     def execute(self, query: str):
         query = query.strip()
