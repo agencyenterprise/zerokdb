@@ -89,7 +89,7 @@ class SimpleSQLDatabase:
             elif col_type == "bool":
                 converted_values.append(val.lower() in ["true", "1"])
             elif col_type == "string":
-                converted_values.append(val)
+                converted_values.append(val.strip("'"))
             elif col_type == "datetime":
                 converted_values.append(datetime.datetime.fromisoformat(val))
             elif col_type == "list[float]":
