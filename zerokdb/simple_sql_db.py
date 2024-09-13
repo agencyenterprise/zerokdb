@@ -62,12 +62,17 @@ class SimpleSQLDatabase:
         }
 
     def _insert_into(self, query: str):
-        match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query, re.DOTALL)
+        match = re.match(
+            r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query, re.DOTALL
+        )
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
         columns = [col.strip() for col in columns.split(",")]
-        values = [val.strip() for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)]
+        values = [
+            val.strip()
+            for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)
+        ]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         table = self.tables[table_name]
@@ -113,7 +118,7 @@ class SimpleSQLDatabase:
 
     def _select(self, query):
         match = re.match(
-            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?(?: LIMIT (\d+))?",
+            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?$",
             query,
         )
         if not match:
@@ -125,7 +130,6 @@ class SimpleSQLDatabase:
             group_by_clause,
             order_by_clause,
             cosine_similarity_clause,
-            limit_clause,
         ) = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
@@ -143,7 +147,7 @@ class SimpleSQLDatabase:
         # Parse WHERE clause if present
         where_condition = None
         if where_clause:
-            where_column = where_clause.split('=')[0].strip()
+            where_column = where_clause.split("=")[0].strip()
             if table["column_types"][where_column] == "int":
                 where_match = re.match(r"(\w+) = (\d+)", where_clause)
             else:
@@ -216,22 +220,16 @@ class SimpleSQLDatabase:
                 (
                     row,
                     np.dot(row[vector_index], target_vector)
-                    / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)),
+                    / (
+                        np.linalg.norm(row[vector_index])
+                        * np.linalg.norm(target_vector)
+                    ),
                 )
                 for row in result
             ]
             similarities.sort(key=lambda x: x[1], reverse=True)
             for row, similarity in similarities:
                 print(f"Row: {row}, Similarity: {similarity}")
-            if limit_clause:
-                limit = int(limit_clause)
-                result = [[row[i] for i in column_indices] for row, _ in similarities[:limit]]
-            else:
-                result = [[row[i] for i in column_indices] for row, _ in similarities]
-
-        # Apply LIMIT clause if present
-        if limit_clause:
-            limit = int(limit_clause)
-            result = result[:limit]
+            result = [row for row, _ in similarities]
 
         return result
