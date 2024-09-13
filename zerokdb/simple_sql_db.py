@@ -113,7 +113,7 @@ class SimpleSQLDatabase:
 
     def _select(self, query):
         match = re.match(
-            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?",
+            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?(?: LIMIT (\d+))?",
             query,
         )
         if not match:
@@ -125,6 +125,7 @@ class SimpleSQLDatabase:
             group_by_clause,
             order_by_clause,
             cosine_similarity_clause,
+            limit_clause,
         ) = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
@@ -223,5 +224,10 @@ class SimpleSQLDatabase:
             for row, similarity in similarities:
                 print(f"Row: {row}, Similarity: {similarity}")
             result = [row for row, _ in similarities]
+
+        # Apply LIMIT clause if present
+        if limit_clause:
+            limit = int(limit_clause)
+            result = result[:limit]
 
         return result
