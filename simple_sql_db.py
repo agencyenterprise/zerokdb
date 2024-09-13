@@ -2,6 +2,7 @@ import re
 import datetime
 import numpy as np
 
+
 class SimpleSQLDatabase:
     def __init__(self, storage, change_tracker=None):
         self.storage = storage
@@ -18,8 +19,9 @@ class SimpleSQLDatabase:
         elif query.startswith("INSERT INTO"):
             self._insert_into(query)
         elif query.startswith("SELECT"):
-            return self._select(query)
             self.storage.save(self.tables)
+            return self._select(query)
+
         elif query.startswith("CREATE INDEX"):
             self._create_index(query)
             raise ValueError("Unsupported SQL command")
@@ -33,10 +35,22 @@ class SimpleSQLDatabase:
         column_defs = {}
         for col in columns:
             col_name, col_type = col.split()
-            if col_type not in ["string", "int", "float", "bool", "datetime", "list[float]"]:
+            if col_type not in [
+                "string",
+                "int",
+                "float",
+                "bool",
+                "datetime",
+                "list[float]",
+            ]:
                 raise ValueError(f"Unsupported data type {col_type}")
             column_defs[col_name] = col_type
-        self.tables[table_name] = {"columns": list(column_defs.keys()), "column_types": column_defs, "rows": [], "indexes": {}}
+        self.tables[table_name] = {
+            "columns": list(column_defs.keys()),
+            "column_types": column_defs,
+            "rows": [],
+            "indexes": {},
+        }
 
     def _insert_into(self, query):
         match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query)
@@ -63,7 +77,7 @@ class SimpleSQLDatabase:
             elif col_type == "datetime":
                 converted_values.append(datetime.datetime.fromisoformat(val))
             elif col_type == "list[float]":
-                converted_values.append(np.fromstring(val.strip('[]'), sep=','))
+                converted_values.append(np.fromstring(val.strip("[]"), sep=","))
                 converted_values.append(val)
         table["rows"].append(converted_values)
 
@@ -86,10 +100,20 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
-        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?", query)
+        match = re.match(
+            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?",
+            query,
+        )
         if not match:
             raise ValueError("Invalid SELECT syntax")
-        columns, table_name, where_clause, group_by_clause, order_by_clause, cosine_similarity_clause = match.groups()
+        (
+            columns,
+            table_name,
+            where_clause,
+            group_by_clause,
+            order_by_clause,
+            cosine_similarity_clause,
+        ) = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
@@ -104,7 +128,9 @@ class SimpleSQLDatabase:
                 raise ValueError("Invalid WHERE syntax")
             where_column, where_value = where_match.groups()
             if where_column not in table["columns"]:
-                raise ValueError(f"Column {where_column} does not exist in table {table_name}")
+                raise ValueError(
+                    f"Column {where_column} does not exist in table {table_name}"
+                )
             where_condition = (where_column, where_value)
         if columns == ["*"]:
             columns = table["columns"]
@@ -129,7 +155,9 @@ class SimpleSQLDatabase:
         if group_by_clause:
             group_by_column = group_by_clause.strip()
             if group_by_column not in table["columns"]:
-                raise ValueError(f"Column {group_by_column} does not exist in table {table_name}")
+                raise ValueError(
+                    f"Column {group_by_column} does not exist in table {table_name}"
+                )
             group_by_index = table["columns"].index(group_by_column)
             grouped_result = {}
             for row in result:
@@ -143,18 +171,27 @@ class SimpleSQLDatabase:
         if order_by_clause:
             order_by_column = order_by_clause.strip()
             if order_by_column not in table["columns"]:
-                raise ValueError(f"Column {order_by_column} does not exist in table {table_name}")
+                raise ValueError(
+                    f"Column {order_by_column} does not exist in table {table_name}"
+                )
             order_by_index = table["columns"].index(order_by_column)
             order_by_type = table["column_types"][order_by_column]
             result.sort(key=lambda row: row[order_by_index])
 
         # Perform cosine similarity if COSINE SIMILARITY clause is present
         if cosine_similarity_clause:
-            vector_column, target_vector = cosine_similarity_clause.split(' WITH ')
-            target_vector = np.fromstring(target_vector.strip('[]'), sep=',')
+            vector_column, target_vector = cosine_similarity_clause.split(" WITH ")
+            target_vector = np.fromstring(target_vector.strip("[]"), sep=",")
             if vector_column not in table["columns"]:
-                raise ValueError(f"Column {vector_column} does not exist in table {table_name}")
+                raise ValueError(
+                    f"Column {vector_column} does not exist in table {table_name}"
+                )
             vector_index = table["columns"].index(vector_column)
-            result = sorted(result, key=lambda row: np.dot(row[vector_index], target_vector) / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)), reverse=True)
+            result = sorted(
+                result,
+                key=lambda row: np.dot(row[vector_index], target_vector)
+                / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)),
+                reverse=True,
+            )
 
         return result
