@@ -2,17 +2,20 @@ import re
 import datetime
 
 class SimpleSQLDatabase:
-    def __init__(self):
-        self.tables = {}
+    def __init__(self, storage):
+        self.storage = storage
+        self.tables = self.storage.load()
 
     def execute(self, query):
         query = query.strip()
         if query.startswith("CREATE TABLE"):
             self._create_table(query)
+            self.storage.save(self.tables)
         elif query.startswith("INSERT INTO"):
             self._insert_into(query)
         elif query.startswith("SELECT"):
             return self._select(query)
+            self.storage.save(self.tables)
         elif query.startswith("CREATE INDEX"):
             self._create_index(query)
             raise ValueError("Unsupported SQL command")
