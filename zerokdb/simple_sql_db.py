@@ -137,7 +137,7 @@ class SimpleSQLDatabase:
         # Parse WHERE clause if present
         where_condition = None
         if where_clause:
-            where_match = re.match(r"(\w+) = '(.+)'", where_clause)
+            where_match = re.match(r"(\w+) = (.+)", where_clause)
             if not where_match:
                 raise ValueError("Invalid WHERE syntax")
             where_column, where_value = where_match.groups()
