@@ -41,6 +41,8 @@ class SimpleSQLDatabase:
             raise ValueError("Invalid CREATE TABLE syntax")
         table_name, columns = match.groups()
         columns = [col.strip() for col in columns.split(",")]
+        if columns == ["*"]:
+            columns = table["columns"]
         column_defs = {}
         for col in columns:
             col_name, col_type = col.split()
