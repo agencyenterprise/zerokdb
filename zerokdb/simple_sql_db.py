@@ -118,7 +118,7 @@ class SimpleSQLDatabase:
 
     def _select(self, query):
         match = re.match(
-            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?$",
+            r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: LIMIT (\d+))?(?: COSINE SIMILARITY (.+))?$",
             query,
         )
         if not match:
