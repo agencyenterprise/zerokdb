@@ -1,5 +1,6 @@
 import re
 import datetime
+import numpy as np
 
 class SimpleSQLDatabase:
     def __init__(self, storage):
@@ -29,7 +30,7 @@ class SimpleSQLDatabase:
         column_defs = {}
         for col in columns:
             col_name, col_type = col.split()
-            if col_type not in ["string", "int", "float", "bool", "datetime"]:
+            if col_type not in ["string", "int", "float", "bool", "datetime", "list[float]"]:
                 raise ValueError(f"Unsupported data type {col_type}")
             column_defs[col_name] = col_type
         self.tables[table_name] = {"columns": list(column_defs.keys()), "column_types": column_defs, "rows": [], "indexes": {}}
@@ -58,7 +59,8 @@ class SimpleSQLDatabase:
                 converted_values.append(val.lower() in ["true", "1"])
             elif col_type == "datetime":
                 converted_values.append(datetime.datetime.fromisoformat(val))
-            else:  # string
+            elif col_type == "list[float]":
+                converted_values.append(np.fromstring(val.strip('[]'), sep=','))
                 converted_values.append(val)
         table["rows"].append(converted_values)
 
@@ -81,10 +83,10 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
-        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?", query)
+        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: COSINE SIMILARITY (.+))?", query)
         if not match:
             raise ValueError("Invalid SELECT syntax")
-        columns, table_name, where_clause, group_by_clause, order_by_clause = match.groups()
+        columns, table_name, where_clause, group_by_clause, order_by_clause, cosine_similarity_clause = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
@@ -142,5 +144,14 @@ class SimpleSQLDatabase:
             order_by_index = table["columns"].index(order_by_column)
             order_by_type = table["column_types"][order_by_column]
             result.sort(key=lambda row: row[order_by_index])
+
+        # Perform cosine similarity if COSINE SIMILARITY clause is present
+        if cosine_similarity_clause:
+            vector_column, target_vector = cosine_similarity_clause.split(' WITH ')
+            target_vector = np.fromstring(target_vector.strip('[]'), sep=',')
+            if vector_column not in table["columns"]:
+                raise ValueError(f"Column {vector_column} does not exist in table {table_name}")
+            vector_index = table["columns"].index(vector_column)
+            result = sorted(result, key=lambda row: np.dot(row[vector_index], target_vector) / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)), reverse=True)
 
         return result
