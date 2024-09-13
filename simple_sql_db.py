@@ -177,7 +177,6 @@ class SimpleSQLDatabase:
                     f"Column {order_by_column} does not exist in table {table_name}"
                 )
             order_by_index = table["columns"].index(order_by_column)
-            order_by_type = table["column_types"][order_by_column]
             result.sort(key=lambda row: row[order_by_index])
 
         # Perform cosine similarity if COSINE SIMILARITY clause is present
