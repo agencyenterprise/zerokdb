@@ -1,4 +1,5 @@
 import re
+import datetime
 
 class SimpleSQLDatabase:
     def __init__(self):
@@ -22,7 +23,13 @@ class SimpleSQLDatabase:
             raise ValueError("Invalid CREATE TABLE syntax")
         table_name, columns = match.groups()
         columns = [col.strip() for col in columns.split(",")]
-        self.tables[table_name] = {"columns": columns, "rows": [], "indexes": {}}
+        column_defs = {}
+        for col in columns:
+            col_name, col_type = col.split()
+            if col_type not in ["string", "int", "float", "bool", "datetime"]:
+                raise ValueError(f"Unsupported data type {col_type}")
+            column_defs[col_name] = col_type
+        self.tables[table_name] = {"columns": list(column_defs.keys()), "column_types": column_defs, "rows": [], "indexes": {}}
 
     def _insert_into(self, query):
         match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query)
@@ -36,7 +43,21 @@ class SimpleSQLDatabase:
         table = self.tables[table_name]
         if columns != table["columns"]:
             raise ValueError("Column names do not match")
-        table["rows"].append(values)
+        # Validate and convert values based on column types
+        converted_values = []
+        for col, val in zip(columns, values):
+            col_type = table["column_types"][col]
+            if col_type == "int":
+                converted_values.append(int(val))
+            elif col_type == "float":
+                converted_values.append(float(val))
+            elif col_type == "bool":
+                converted_values.append(val.lower() in ["true", "1"])
+            elif col_type == "datetime":
+                converted_values.append(datetime.datetime.fromisoformat(val))
+            else:  # string
+                converted_values.append(val)
+        table["rows"].append(converted_values)
 
     def _create_index(self, query):
         match = re.match(r"CREATE INDEX (\w+) ON (\w+) \((.+)\)", query)
