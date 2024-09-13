@@ -1,12 +1,14 @@
 from simple_sql_db import SimpleSQLDatabase
 from file_storage import FileStorage
+from ipfs_storage import IPFSStorage
 from text_to_embedding import TextToEmbedding
 
 class DatabaseAPI:
     def __init__(self, storage_type='file', storage_location='database.json'):
         if storage_type == 'file':
             self.storage = FileStorage(storage_location)
-        else:
+        elif storage_type == 'ipfs':
+            self.storage = IPFSStorage()
             raise ValueError("Unsupported storage type")
         self.db = SimpleSQLDatabase(self.storage)
         self.text_to_embedding = TextToEmbedding()
