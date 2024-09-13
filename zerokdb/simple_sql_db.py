@@ -62,12 +62,12 @@ class SimpleSQLDatabase:
         }
 
     def _insert_into(self, query: str):
-        match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query)
+        match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query, re.DOTALL)
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
         columns = [col.strip() for col in columns.split(",")]
-        values = [val.strip().strip("'") for val in values.split(",")]
+        values = [val.strip() for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         table = self.tables[table_name]
