@@ -211,11 +211,17 @@ class SimpleSQLDatabase:
                 )
             vector_index = table["columns"].index(vector_column)
             vector_index = table["columns"].index(vector_column)
-            result = sorted(
-                result,
-                key=lambda row: np.dot(row[vector_index], target_vector)
-                / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)),
-                reverse=True,
-            )
+            similarities = [
+                (
+                    row,
+                    np.dot(row[vector_index], target_vector)
+                    / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)),
+                )
+                for row in result
+            ]
+            similarities.sort(key=lambda x: x[1], reverse=True)
+            for row, similarity in similarities:
+                print(f"Row: {row}, Similarity: {similarity}")
+            result = [row for row, _ in similarities]
 
         return result
