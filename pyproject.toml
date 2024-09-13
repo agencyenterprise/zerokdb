@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "zerokdb"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <lolo.tomaz@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+web3 = "^7.2.0"
+ipfshttpclient = "^0.7.0"
+numpy = "1.26.0"
+torch = "2.2.0"
+transformers = "^4.44.2"
+click = "^8.1.7"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -129,6 +129,7 @@ class SimpleSQLDatabase:
             where_clause,
             group_by_clause,
             order_by_clause,
+            limit_clause,
             cosine_similarity_clause,
         ) = match.groups()
         columns = [col.strip() for col in columns.split(",")]
@@ -231,5 +232,6 @@ class SimpleSQLDatabase:
             for row, similarity in similarities:
                 print(f"Row: {row}, Similarity: {similarity}")
             result = [row for row, _ in similarities]
-
+        if limit_clause:
+            result = result[: int(limit_clause)]
         return result

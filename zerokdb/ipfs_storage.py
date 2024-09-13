@@ -1,8 +1,9 @@
 import ipfshttpclient
 import json
 
+
 class IPFSStorage:
-    def __init__(self, ipfs_address='/dns/localhost/tcp/5001/http'):
+    def __init__(self, ipfs_address="/dns/localhost/tcp/5001/http"):
         self.client = ipfshttpclient.connect(ipfs_address)
         self.cid = None
 
