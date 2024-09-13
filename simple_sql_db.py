@@ -78,10 +78,10 @@ class SimpleSQLDatabase:
                 index[key] = []
             index[key].append(row)
         table["indexes"][index_name] = index
-        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?", query)
+        match = re.match(r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: ORDER BY (.+))?", query)
         if not match:
             raise ValueError("Invalid SELECT syntax")
-        columns, table_name, where_clause = match.groups()
+        columns, table_name, where_clause, order_by_clause = match.groups()
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
@@ -117,4 +117,13 @@ class SimpleSQLDatabase:
                 if row[where_index] != where_value:
                     continue
             result.append([row[i] for i in column_indices])
+        # Sort results if ORDER BY clause is present
+        if order_by_clause:
+            order_by_column = order_by_clause.strip()
+            if order_by_column not in table["columns"]:
+                raise ValueError(f"Column {order_by_column} does not exist in table {table_name}")
+            order_by_index = table["columns"].index(order_by_column)
+            order_by_type = table["column_types"][order_by_column]
+            result.sort(key=lambda row: row[order_by_index])
+
         return result
