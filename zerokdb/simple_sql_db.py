@@ -165,6 +165,8 @@ class SimpleSQLDatabase:
             if where_condition:
                 where_column, where_value = where_condition
                 where_index = table["columns"].index(where_column)
+                if table["column_types"][where_column] == "int":
+                    where_value = int(where_value)
                 if row[where_index] != where_value:
                     continue
             result.append([row[i] for i in column_indices])
