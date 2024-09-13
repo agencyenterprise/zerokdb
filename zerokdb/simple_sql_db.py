@@ -88,7 +88,7 @@ class SimpleSQLDatabase:
             elif col_type == "datetime":
                 converted_values.append(datetime.datetime.fromisoformat(val))
             elif col_type == "list[float]":
-                converted_values.append(np.fromstring(val.strip("[]"), sep=","))
+                converted_values.append(np.fromstring(val.strip("[]"), sep=",").tolist())
         table["rows"].append(converted_values)
 
     def _create_index(self, query: str):
