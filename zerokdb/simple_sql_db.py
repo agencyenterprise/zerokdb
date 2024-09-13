@@ -229,4 +229,9 @@ class SimpleSQLDatabase:
             else:
                 result = [[row[i] for i in column_indices] for row, _ in similarities]
 
+        # Apply LIMIT clause if present
+        if limit_clause:
+            limit = int(limit_clause)
+            result = result[:limit]
+
         return result
