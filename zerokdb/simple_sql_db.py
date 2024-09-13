@@ -207,8 +207,8 @@ class SimpleSQLDatabase:
             vector_index = table["columns"].index(vector_column)
             result = sorted(
                 result,
-                key=lambda row: np.dot(row[vector_index], target_vector)
-                / (np.linalg.norm(row[vector_index]) * np.linalg.norm(target_vector)),
+                key=lambda row: np.dot(row[table["columns"].index(vector_column)], target_vector)
+                / (np.linalg.norm(row[table["columns"].index(vector_column)]) * np.linalg.norm(target_vector)),
                 reverse=True,
             )
 
