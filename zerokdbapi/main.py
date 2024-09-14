@@ -7,6 +7,6 @@ storage = IPFSStorage()
 
 
 class Payload(BaseModel):
-    data: dict
+    data: Dict[str, Any]
 
 

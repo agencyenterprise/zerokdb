@@ -1,14 +1,15 @@
 import json
+from typing import Optional, Dict, Any, List
 import hashlib
 import requests
 
 
 class IPFSStorage:
-    def __init__(self, ipfs_address="/dns/localhost/tcp/5001/http"):
-        self.cid = None  # This will hold the latest data chunk CID
-        self.cid_sequence_cid = None  # This will hold the CID of the sequence list
+    def __init__(self, ipfs_address: str = "/dns/localhost/tcp/5001/http"):
+        self.cid: Optional[str] = None  # This will hold the latest data chunk CID
+        self.cid_sequence_cid: Optional[str] = None  # This will hold the CID of the sequence list
 
-    def save_to_ipfs_with_pinata(self, data):
+    def save_to_ipfs_with_pinata(self, data: Dict[str, Any]) -> str:
         """
         Save data to IPFS using Pinata SDK and return the CID.
         """
@@ -24,7 +25,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
-    def read_from_ipfs(self, cid):
+    def read_from_ipfs(self, cid: str) -> Dict[str, Any]:
         """
         Utility function to read data from IPFS using Pinata.
         """
@@ -40,7 +41,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
-    def load(self, cid=None):
+    def load(self, cid: Optional[str] = None) -> Dict[str, Any]:
         """
         Load data from IPFS using a given CID or the stored CID.
         """
@@ -51,7 +52,7 @@ class IPFSStorage:
         # Use Pinata to retrieve data from IPFS using CID
         return self.read_from_ipfs(self.cid)
 
-    def append_linked_data(self, new_data):
+    def append_linked_data(self, new_data: Dict[str, Any]) -> str:
         """
         Append new data to the linked list in IPFS and update the CID sequence.
         """
@@ -107,7 +108,7 @@ class IPFSStorage:
 
         return new_cid
 
-    def load_sequence(self):
+    def load_sequence(self) -> Dict[str, Any]:
         """
         Load the CID sequence from IPFS. If no sequence exists, return a default structure.
         """
@@ -119,7 +120,7 @@ class IPFSStorage:
         sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
         return sequence_data
 
-    def traverse_linked_data(self, start_cid=None):
+    def traverse_linked_data(self, start_cid: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Traverse the linked list starting from the given CID and return all the data.
         """
@@ -141,7 +142,7 @@ class IPFSStorage:
 
         return all_data
 
-    def get_cid_sequence(self):
+    def get_cid_sequence(self) -> Dict[str, Any]:
         """
         Return the stored sequence of CIDs from IPFS.
         """
