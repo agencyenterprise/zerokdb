@@ -5,8 +5,10 @@ from zerokdbapi.ipfs_service import IPFSService
 app = FastAPI()
 ipfs_service = IPFSService()
 
+
 class Payload(BaseModel):
     data: dict
+
 
 @app.post("/save")
 async def save_payload(payload: Payload):
