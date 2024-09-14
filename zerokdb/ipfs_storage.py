@@ -54,9 +54,9 @@ class IPFSStorage:
         # Use Pinata to retrieve data from IPFS using CID
         return self.read_from_ipfs(self.cid)
 
-    def append_linked_data(self, new_data: Dict[str, Any]) -> str:
+    def append_data(self, new_data: Dict[str, Any]) -> str:
         """
-        Append new data to the linked list in IPFS and update the CID sequence.
+        Append new data to IPFS and update the CID sequence.
         """
         # Step 1: Retrieve the current CID sequence from IPFS
         current_sequence = self.load_sequence()
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     storage = IPFSStorage()
 
     # Append new data chunks to the linked list and update the CID sequence
-    cid1 = storage.append_linked_data({"id": 1, "value": "First Entry"})
-    cid2 = storage.append_linked_data({"id": 2, "value": "Second Entry"})
-    cid3 = storage.append_linked_data({"id": 3, "value": "Third Entry"})
+    cid1 = storage.append_data({"id": 1, "value": "First Entry"})
+    cid2 = storage.append_data({"id": 2, "value": "Second Entry"})
+    cid3 = storage.append_data({"id": 3, "value": "Third Entry"})
 
     # Retrieve the full sequence of CIDs in the structured format
     cid_sequence = storage.get_cid_sequence()
