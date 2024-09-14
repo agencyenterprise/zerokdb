@@ -17,6 +17,8 @@ async def save_sequence(payload: Payload):
         return {"cid": cid}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/save_payload")
 async def save_payload(payload: Payload):
     try:
