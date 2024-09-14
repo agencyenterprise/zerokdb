@@ -16,10 +16,6 @@ class EnhancedFileStorage:
             return response.json()
         else:
             response.raise_for_status()
-        """
-        Save data by appending it to the REST API at zerokdbapi.
-        """
-        self.append_data_to_api(entity_id, data)
 
     def load(self, cid):
         """
