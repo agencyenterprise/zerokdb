@@ -155,10 +155,6 @@ class IPFSStorage:
             merged_data["rows"].extend(table.get("rows", []))
 
         return merged_data
-        """
-        Return the stored sequence of CIDs from IPFS.
-        """
-        return self.load_sequence()
 
 
 # Example Usage
