@@ -115,9 +115,9 @@ class IPFSStorage:
             # Return default structure if no sequence exists
             return {"default_sequence": [], "chunk_history": [], "latest_chunk": None}
 
-        # Load the current CID sequence
-        sequence_data = self.client.cat(self.cid_sequence_cid)
-        return json.loads(sequence_data)
+        # Load the current CID sequence using the utility function
+        sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
+        return sequence_data
 
     def traverse_linked_data(self, start_cid=None):
         """
