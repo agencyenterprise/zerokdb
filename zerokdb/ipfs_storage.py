@@ -109,7 +109,7 @@ class IPFSStorage:
         sequence_data = self.client.cat(self.cid_sequence_cid)
         return json.loads(sequence_data)
 
-    def save(self, data):
+    def traverse_linked_data(self, start_cid=None):
         """
         Save data to IPFS and return the CID.
         """
