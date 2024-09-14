@@ -6,16 +6,17 @@ class EnhancedFileStorage:
     def __init__(self, filename):
         self.filename = filename
 
-    def save(self, data):
-        with open(self.filename, "w") as file:
-            json.dump(data, file)
+    def save(self, data, entity_id):
+        """
+        Save data by appending it to the REST API at zerokdbapi.
+        """
+        self.append_data_to_api(entity_id, data)
 
-    def load(self):
-        try:
-            with open(self.filename, "r") as file:
-                return json.load(file)
-        except FileNotFoundError:
-            return {}
+    def load(self, cid):
+        """
+        Load data by querying the Pinata API using a CID.
+        """
+        return self.query_pinata(cid)
 
     def query_pinata(self, cid):
         """
