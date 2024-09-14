@@ -57,7 +57,7 @@ class IPFSStorage:
         }
 
         # Step 3: Compute the hash of the chunk's data (excluding the next reference)
-        chunk_hash_data = json.dumps(new_data).encode(
+        chunk_hash_data = json.dumps(new_data).encode("utf-8")
             "utf-8"
         )  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
