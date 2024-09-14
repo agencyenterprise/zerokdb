@@ -2,7 +2,21 @@ from fastapi import FastAPI
 import json
 import hashlib
 
+from typing import Dict, Any
+
 app = FastAPI()
+
+# Mock function to simulate saving data to IPFS
+def save_to_ipfs(data: Dict[str, Any]) -> str:
+    # This function should interact with IPFS and return a CID
+    return "mock_cid"
+
+# Initialize a mock current_sequence
+current_sequence = {
+    "default_sequence": [],
+    "chunk_history": [],
+    "latest_chunk": None
+}
 
 @app.post("/save")
 async def save_data(data: dict):
