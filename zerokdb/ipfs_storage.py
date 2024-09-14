@@ -1,6 +1,7 @@
 import ipfshttpclient
 import json
 import hashlib
+import requests
 
 
 class IPFSStorage:
@@ -13,10 +14,12 @@ class IPFSStorage:
         """
         Save data to IPFS and return the CID.
         """
-        # Convert data to JSON and save to IPFS
-        json_data = json.dumps(data)
-        result = self.client.add_str(json_data)
-        return result  # Return CID of the saved data
+        # Use the FastAPI REST API to save data to IPFS
+        response = requests.post("http://localhost:8000/save", json={"data": data})
+        if response.status_code == 200:
+            return response.json()["cid"]
+        else:
+            response.raise_for_status()
 
     def load(self, cid=None):
         """
@@ -49,8 +52,12 @@ class IPFSStorage:
         )  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
-        # Step 4: Save the new chunk to IPFS and get the new CID
-        new_cid = self.save(chunk)
+        # Step 4: Use the FastAPI REST API to save the new chunk to IPFS and get the new CID
+        response = requests.post("http://localhost:8000/save", json={"data": chunk})
+        if response.status_code == 200:
+            new_cid = response.json()["cid"]
+        else:
+            response.raise_for_status()
 
         # Step 5: Update the sequence with the new chunk details
         chunk_entry = {"chunk_id": new_cid, "chunk_hash": chunk_hash}
