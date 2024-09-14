@@ -5,7 +5,6 @@ import requests
 
 class IPFSStorage:
     def __init__(self, ipfs_address="/dns/localhost/tcp/5001/http"):
-        self.client = ipfshttpclient.connect(ipfs_address)
         self.cid = None  # This will hold the latest data chunk CID
         self.cid_sequence_cid = None  # This will hold the CID of the sequence list
 
