@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 import hashlib
 import requests
 
@@ -122,19 +122,6 @@ class IPFSStorage:
         sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
         return sequence_data
 
-    def download_ids_from_sequence(self, table_name: str) -> List[str]:
-        """
-        Read the sequence and download the IDs from the specified table.
-        """
-        sequence = self.load_sequence()
-        ids = []
-        for chunk_entry in sequence.get("default_sequence", []):
-            chunk = self.load(chunk_entry["chunk_id"])
-            table = chunk.get(table_name, {})
-            rows = table.get("rows", [])
-            ids.extend(row[0] for row in rows)  # Assuming the first column is "id"
-        return ids
-
     def get_cid_sequence(self) -> Dict[str, Any]:
         """
         Return the stored sequence of CIDs from IPFS.
@@ -154,7 +141,9 @@ class IPFSStorage:
 
             if merged_data is None:
                 # Initialize merged_data with the first chunk's structure
-                merged_data = {key: value for key, value in table.items() if key != "rows"}
+                merged_data = {
+                    key: value for key, value in table.items() if key != "rows"
+                }
                 merged_data["rows"] = []
 
             # Extend the rows with the current chunk's rows
@@ -177,5 +166,5 @@ if __name__ == "__main__":
     print("CID Sequence:", json.dumps(cid_sequence, indent=2))
 
     # Traverse the linked list starting from the latest chunk
-    all_data = storage.traverse_linked_data(cid3)
+    all_data = storage.download_table("table_name")
     print("Retrieved linked data:", all_data)
