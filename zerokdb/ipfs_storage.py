@@ -127,7 +127,12 @@ class IPFSStorage:
         Read the sequence and download the IDs from the default sequence.
         """
         sequence = self.load_sequence()
-        ids = [chunk["chunk_id"] for chunk in sequence.get("default_sequence", [])]
+        ids = []
+        for chunk_entry in sequence.get("default_sequence", []):
+            chunk = self.load(chunk_entry["chunk_id"])
+            users_table = chunk.get("users", {})
+            rows = users_table.get("rows", [])
+            ids.extend(row[0] for row in rows)  # Assuming the first column is "id"
         return ids
 
     def get_cid_sequence(self) -> Dict[str, Any]:
