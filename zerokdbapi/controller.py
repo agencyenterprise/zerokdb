@@ -1,3 +1,7 @@
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
+from zerokdbapi.db import TableSequences, SessionLocal
+
 def add_table_sequence(table_name: str, cid: str) -> TableSequences:
     """
     Add a new record to the TableSequences model.
