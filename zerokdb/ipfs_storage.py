@@ -57,9 +57,7 @@ class IPFSStorage:
         }
 
         # Step 3: Compute the hash of the chunk's data (excluding the next reference)
-        chunk_hash_data = json.dumps(new_data).encode("utf-8")
-            "utf-8"
-        )  # Hash only the 'data' part
+        chunk_hash_data = json.dumps(new_data).encode("utf-8")  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
         # Step 4: Use the FastAPI REST API to save the new chunk to IPFS and get the new CID
