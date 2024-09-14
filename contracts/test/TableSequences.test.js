@@ -1,7 +1,7 @@
 let expect;
 
 before(async () => {
-  const chai = await import("chai");
+  const chai = require("chai");
   const chaiAsPromised = require("chai-as-promised");
   const chaiEthers = require("chai-ethers");
   chai.use(chaiAsPromised);
