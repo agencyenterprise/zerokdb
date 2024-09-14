@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from zerokdbapi.db import TableSequences, SessionLocal
 
 def get_table_sequence_by_id(record_id: int):
