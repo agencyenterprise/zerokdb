@@ -8,7 +8,29 @@ class IPFSStorage:
         self.cid = None  # This will hold the latest data chunk CID
         self.cid_sequence_cid = None  # This will hold the CID of the sequence list
 
-    def save(self, data):
+    def call_rest_api(self, endpoint, payload):
+        """
+        Utility function to call the FastAPI REST API.
+        """
+        response = requests.post(f"http://localhost:8000/{endpoint}", json=payload)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
+
+    def read_from_ipfs(self, cid):
+        """
+        Utility function to read data from IPFS using Pinata.
+        """
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+        }
+        response = requests.get(f"https://gateway.pinata.cloud/ipfs/{cid}", headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
         """
         Save data to IPFS and return the CID.
         """
