@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from zerokdbapi.ipfs_service import IPFSService
+from zerokdb.ipfs_storage import IPFSStorage
 
 app = FastAPI()
-ipfs_service = IPFSService()
+storage = IPFSStorage()
 
 
 class Payload(BaseModel):
@@ -13,8 +13,8 @@ class Payload(BaseModel):
 @app.post("/save_sequence")
 async def save_sequence(payload: Payload):
     try:
-        # Save the new data directly to IPFS
-        cid = ipfs_service.save_to_ipfs(payload.data)
+        # Use the append_linked_data method to save data
+        cid = storage.append_linked_data(payload.data)
         return {"cid": cid}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
