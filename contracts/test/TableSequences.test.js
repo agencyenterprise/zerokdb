@@ -2,6 +2,10 @@ let expect;
 
 before(async () => {
   const chai = await import("chai");
+  const chaiAsPromised = await import("chai-as-promised");
+  const chaiEthers = await import("chai-ethers");
+  chai.use(chaiAsPromised.default);
+  chai.use(chaiEthers.default);
   expect = chai.expect;
 });
 
