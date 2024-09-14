@@ -1,14 +1,16 @@
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
-from zerokdbapi.db import TableSequences, SessionLocal
-
-def get_table_sequence_by_id(record_id: int):
+def add_table_sequence(table_name: str, cid: str) -> TableSequences:
     """
-    Retrieve a record from the TableSequences model based on the given id.
+    Add a new record to the TableSequences model.
     """
     session: Session = SessionLocal()
     try:
-        record = session.query(TableSequences).filter(TableSequences.id == record_id).first()
-        return record
+        new_record = TableSequences(table_name=table_name, cid=cid)
+        session.add(new_record)
+        session.commit()
+        session.refresh(new_record)
+        return new_record
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise e
     finally:
         session.close()
