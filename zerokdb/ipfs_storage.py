@@ -1,7 +1,6 @@
 import json
 import hashlib
 import requests
-from pinatapy import PinataPy
 
 
 class IPFSStorage:
@@ -13,9 +12,17 @@ class IPFSStorage:
         """
         Save data to IPFS using Pinata SDK and return the CID.
         """
-        pinata = PinataPy('your_pinata_api_key', 'your_pinata_secret_api_key')
-        response = pinata.pin_json_to_ipfs(data)
-        return response['IpfsHash']
+        url = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+            "Content-Type": "application/json"
+        }
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            return response.json()['IpfsHash']
+        else:
+            response.raise_for_status()
 
     def read_from_ipfs(self, cid):
         """
