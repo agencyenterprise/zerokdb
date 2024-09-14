@@ -31,15 +31,6 @@ class IPFSStorage:
             return response.json()
         else:
             response.raise_for_status()
-        """
-        Save data to IPFS and return the CID.
-        """
-        # Use the FastAPI REST API to save data to IPFS
-        response = requests.post("http://localhost:8000/save", json={"data": data})
-        if response.status_code == 200:
-            return response.json()["cid"]
-        else:
-            response.raise_for_status()
 
     def load(self, cid=None):
         """
