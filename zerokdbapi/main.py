@@ -105,13 +105,3 @@ async def dappend_data(payload: AppendDataPayload, entity_id: str):
         return {"data_cid": data_cid, "sequence_cid": cid_sequence}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-def create_new_table(entity_name: str):
-    """
-    Call the POST /entity endpoint to create a new table.
-    """
-    client = TestClient(app)
-    response = client.post("/entity", json={"entity_name": entity_name})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise HTTPException(status_code=response.status_code, detail=response.text)
