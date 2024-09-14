@@ -18,3 +18,22 @@ def add_table_sequence(table_name: str, cid: str) -> TableSequences:
         raise e
     finally:
         session.close()
+def update_table_sequence_cid(record_id: int, new_cid: str) -> TableSequences:
+    """
+    Update the CID for a given record in the TableSequences model.
+    """
+    session: Session = SessionLocal()
+    try:
+        record = session.query(TableSequences).filter(TableSequences.id == record_id).first()
+        if not record:
+            raise ValueError(f"Record with id {record_id} not found.")
+        
+        record.cid = new_cid
+        session.commit()
+        session.refresh(record)
+        return record
+    except SQLAlchemyError as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
