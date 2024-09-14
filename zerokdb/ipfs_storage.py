@@ -122,16 +122,16 @@ class IPFSStorage:
         sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
         return sequence_data
 
-    def download_ids_from_sequence(self) -> List[str]:
+    def download_ids_from_sequence(self, table_name: str) -> List[str]:
         """
-        Read the sequence and download the IDs from the default sequence.
+        Read the sequence and download the IDs from the specified table.
         """
         sequence = self.load_sequence()
         ids = []
         for chunk_entry in sequence.get("default_sequence", []):
             chunk = self.load(chunk_entry["chunk_id"])
-            users_table = chunk.get("users", {})
-            rows = users_table.get("rows", [])
+            table = chunk.get(table_name, {})
+            rows = table.get("rows", [])
             ids.extend(row[0] for row in rows)  # Assuming the first column is "id"
         return ids
 
