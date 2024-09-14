@@ -25,7 +25,10 @@ class ContractController:
         signed_txn = self.web3.eth.account.sign_transaction(txn, private_key)
 
         tx_hash = self.web3.eth.send_raw_transaction(signed_txn.raw_transaction)
-        return self.web3.to_hex(tx_hash)
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+        # Assuming the event is named "SequenceCreated" and has the fields id, tableName, and cid
+        event = self.contract.events.SequenceCreated().process_receipt(tx_receipt)
+        return event[0]['args'] if event else None
 
     def update_sequence_cid(self, sequence_id, new_cid, from_address, private_key):
         nonce = self.web3.eth.get_transaction_count(from_address)
