@@ -135,6 +135,12 @@ class IPFSStorage:
             ids.extend(row[0] for row in rows)  # Assuming the first column is "id"
         return ids
 
+    def get_cid_sequence(self) -> Dict[str, Any]:
+        """
+        Return the stored sequence of CIDs from IPFS.
+        """
+        return self.load_sequence()
+
     def merge_chunks(self, table_name: str) -> Dict[str, Any]:
         """
         Merge all chunks into a single JSON where the rows are the union of all rows.
