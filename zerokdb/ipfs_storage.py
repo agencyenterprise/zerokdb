@@ -1,6 +1,7 @@
 import json
 import hashlib
 import requests
+from pinatapy import PinataPy
 
 
 class IPFSStorage:
@@ -8,7 +9,13 @@ class IPFSStorage:
         self.cid = None  # This will hold the latest data chunk CID
         self.cid_sequence_cid = None  # This will hold the CID of the sequence list
 
-    def call_rest_api(self, endpoint, payload):
+    def save_to_ipfs_with_pinata(self, data):
+        """
+        Save data to IPFS using Pinata SDK and return the CID.
+        """
+        pinata = PinataPy('your_pinata_api_key', 'your_pinata_secret_api_key')
+        response = pinata.pin_json_to_ipfs(data)
+        return response['IpfsHash']
         """
         Utility function to call the FastAPI REST API.
         """
