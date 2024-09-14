@@ -30,7 +30,7 @@ describe("TableSequences", function () {
     expect(event.args.cid).to.equal("CID123");
 
     const sequence = await tableSequences.getSequenceById(1);
-    expect(sequence.id).to.equal(1);
+    expect(sequence.id).to.equal(ethers.BigNumber.from(1));
     expect(sequence.tableName).to.equal("TestTable");
     expect(sequence.cid).to.equal("CID123");
   });
