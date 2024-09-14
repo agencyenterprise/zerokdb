@@ -109,7 +109,13 @@ class IPFSStorage:
         sequence_data = self.client.cat(self.cid_sequence_cid)
         return json.loads(sequence_data)
 
-    def traverse_linked_data(self, start_cid=None):
+    def save(self, data):
+        """
+        Save data to IPFS and return the CID.
+        """
+        # Use the FastAPI REST API to save the data and get the CID
+        response = self.call_rest_api("save", {"data": data})
+        return response["cid"]
         """
         Traverse the linked list starting from the given CID and return all the data.
         """
