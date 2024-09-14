@@ -11,6 +11,7 @@ class EnhancedFileStorage:
         Save data by appending it to the REST API at zerokdbapi.
         """
         self.append_data_to_api(entity_id, data)
+    def create_table(self, entity_name):
         """
         Call the POST /entity endpoint to create a new table.
         """
