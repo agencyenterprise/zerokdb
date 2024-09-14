@@ -66,8 +66,8 @@ class IPFSStorage:
         chunk_hash_data = json.dumps(new_data).encode("utf-8")  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
-        # Step 4: Use the FastAPI REST API to save the new chunk to IPFS and get the new CID
-        new_cid = self.call_rest_api("save", {"data": chunk})["cid"]
+        # Step 4: Save the new chunk to IPFS using Pinata and get the new CID
+        new_cid = self.save_to_ipfs_with_pinata(chunk)
 
         # Step 5: Update the sequence with the new chunk details
         chunk_entry = {"chunk_id": new_cid, "chunk_hash": chunk_hash}
