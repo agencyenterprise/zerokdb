@@ -122,29 +122,13 @@ class IPFSStorage:
         sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
         return sequence_data
 
-    def traverse_linked_data(
-        self, start_cid: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    def download_ids_from_sequence(self) -> List[str]:
         """
-        Traverse the linked list starting from the given CID and return all the data.
+        Read the sequence and download the IDs from the default sequence.
         """
-        if start_cid:
-            self.cid = start_cid
-
-        current_cid = self.cid
-        all_data = []
-
-        while current_cid:
-            # Load the current chunk
-            chunk = self.load(current_cid)
-
-            # Add the current chunk's data to the list
-            all_data.append(chunk["data"])
-
-            # Move to the next chunk
-            current_cid = chunk.get("next")
-
-        return all_data
+        sequence = self.load_sequence()
+        ids = [chunk["chunk_id"] for chunk in sequence.get("default_sequence", [])]
+        return ids
 
     def get_cid_sequence(self) -> Dict[str, Any]:
         """
