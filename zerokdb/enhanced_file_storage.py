@@ -6,7 +6,11 @@ class EnhancedFileStorage:
     def __init__(self, filename):
         self.filename = filename
 
-    def create_table(self, entity_name):
+    def save(self, data, entity_id):
+        """
+        Save data by appending it to the REST API at zerokdbapi.
+        """
+        self.append_data_to_api(entity_id, data)
         """
         Call the POST /entity endpoint to create a new table.
         """
