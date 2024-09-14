@@ -18,5 +18,3 @@ async def save_sequence(payload: Payload):
         return {"cid": cid}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
