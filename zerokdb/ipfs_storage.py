@@ -1,4 +1,3 @@
-import ipfshttpclient
 import json
 import hashlib
 import requests
@@ -29,9 +28,16 @@ class IPFSStorage:
             self.cid = cid
         if not self.cid:
             return {}
-        # Retrieve data from IPFS using CID
-        json_data = self.client.cat(self.cid)
-        return json.loads(json_data)
+        # Use Pinata to retrieve data from IPFS using CID
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+        }
+        response = requests.get(f"https://gateway.pinata.cloud/ipfs/{self.cid}", headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
 
     def append_linked_data(self, new_data):
         """
