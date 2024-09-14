@@ -141,9 +141,9 @@ class IPFSStorage:
         """
         return self.load_sequence()
 
-    def merge_chunks(self, table_name: str) -> Dict[str, Any]:
+    def download_table(self, table_name: str) -> Dict[str, Any]:
         """
-        Merge all chunks into a single JSON where the rows are the union of all rows.
+        Download all chunks into a single JSON where the rows are the union of all rows.
         """
         sequence = self.load_sequence()
         merged_data = None
