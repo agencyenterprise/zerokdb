@@ -16,11 +16,11 @@ class IPFSStorage:
         headers = {
             "pinata_api_key": "your_pinata_api_key",
             "pinata_secret_api_key": "your_pinata_secret_api_key",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
-            return response.json()['IpfsHash']
+            return response.json()["IpfsHash"]
         else:
             response.raise_for_status()
 
@@ -32,7 +32,9 @@ class IPFSStorage:
             "pinata_api_key": "your_pinata_api_key",
             "pinata_secret_api_key": "your_pinata_secret_api_key",
         }
-        response = requests.get(f"https://gateway.pinata.cloud/ipfs/{cid}", headers=headers)
+        response = requests.get(
+            f"https://gateway.pinata.cloud/ipfs/{cid}", headers=headers
+        )
         if response.status_code == 200:
             return response.json()
         else:
@@ -63,7 +65,9 @@ class IPFSStorage:
         }
 
         # Step 3: Compute the hash of the chunk's data (excluding the next reference)
-        chunk_hash_data = json.dumps(new_data).encode("utf-8")  # Hash only the 'data' part
+        chunk_hash_data = json.dumps(new_data).encode(
+            "utf-8"
+        )  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
         # Step 4: Save the new chunk to IPFS using Pinata and get the new CID
@@ -96,7 +100,7 @@ class IPFSStorage:
         current_sequence["latest_chunk"] = new_cid
 
         # Step 7: Save the updated CID sequence to IPFS and store its CID
-        self.cid_sequence_cid = self.save(current_sequence)
+        self.cid_sequence_cid = self.save_to_ipfs_with_pinata(current_sequence)
 
         print(f"New chunk CID: {new_cid}")
         print(f"Updated CID sequence CID: {self.cid_sequence_cid}")
