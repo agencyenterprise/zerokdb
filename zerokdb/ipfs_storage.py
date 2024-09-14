@@ -7,9 +7,11 @@ import requests
 class IPFSStorage:
     def __init__(self, ipfs_address: str = "/dns/localhost/tcp/5001/http"):
         self.cid: Optional[str] = None  # This will hold the latest data chunk CID
-        self.cid_sequence_cid: Optional[str] = None  # This will hold the CID of the sequence list
+        self.cid_sequence_cid: Optional[str] = (
+            None  # This will hold the CID of the sequence list
+        )
 
-    def save_to_ipfs_with_pinata(self, data: Dict[str, Any]) -> str:
+    def save(self, data: Dict[str, Any]) -> str:
         """
         Save data to IPFS using Pinata SDK and return the CID.
         """
@@ -72,7 +74,7 @@ class IPFSStorage:
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
         # Step 4: Save the new chunk to IPFS using Pinata and get the new CID
-        new_cid = self.save_to_ipfs_with_pinata(chunk)
+        new_cid = self.save(chunk)
 
         # Step 5: Update the sequence with the new chunk details
         chunk_entry = {"chunk_id": new_cid, "chunk_hash": chunk_hash}
@@ -101,7 +103,7 @@ class IPFSStorage:
         current_sequence["latest_chunk"] = new_cid
 
         # Step 7: Save the updated CID sequence to IPFS and store its CID
-        self.cid_sequence_cid = self.save_to_ipfs_with_pinata(current_sequence)
+        self.cid_sequence_cid = self.save(current_sequence)
 
         print(f"New chunk CID: {new_cid}")
         print(f"Updated CID sequence CID: {self.cid_sequence_cid}")
@@ -120,7 +122,9 @@ class IPFSStorage:
         sequence_data = self.read_from_ipfs(self.cid_sequence_cid)
         return sequence_data
 
-    def traverse_linked_data(self, start_cid: Optional[str] = None) -> List[Dict[str, Any]]:
+    def traverse_linked_data(
+        self, start_cid: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Traverse the linked list starting from the given CID and return all the data.
         """
