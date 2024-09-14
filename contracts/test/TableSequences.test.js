@@ -24,15 +24,15 @@ describe("TableSequences", function () {
     expect(receipt.events.length).to.equal(1);
     const event = receipt.events[0];
     expect(event.event).to.equal("SequenceCreated");
-    console.log(event.args.id)
-    expect(event.args.id).to.equal(ethers.BigNumber.from("1"));
+    console.log(event.args.id.toNumber())
+    expect(event.args.id.toNumber()).to.equal(1);
     expect(event.args.tableName).to.equal("TestTable");
     expect(event.args.cid).to.equal("CID123");
 
     const sequence = await tableSequences.getSequenceById(1);
-    expect(sequence.id).to.equal(ethers.BigNumber.from(1));
-    expect(sequence.tableName).to.equal("TestTable");
-    expect(sequence.cid).to.equal("CID123");
+    expect(sequence[0].toNumber()).to.equal(1);
+    expect(sequence[1]).to.equal("TestTable");
+    expect(sequence[2]).to.equal("CID123");
   });
 
   it("should update the CID of an existing sequence", async function () {
@@ -43,11 +43,11 @@ describe("TableSequences", function () {
     expect(receipt.events.length).to.equal(1);
     const event = receipt.events[0];
     expect(event.event).to.equal("SequenceUpdated");
-    expect(event.args.id).to.equal(1);
+    expect(event.args.id.toNumber()).to.equal(1);
     expect(event.args.newCid).to.equal("CID456");
 
     const sequence = await tableSequences.getSequenceById(1);
-    expect(sequence.cid).to.equal("CID456");
+    expect(sequence[2]).to.equal("CID456");
   });
 
   it("should revert when updating a non-existent sequence", async function () {
