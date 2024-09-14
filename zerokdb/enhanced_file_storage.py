@@ -6,7 +6,16 @@ class EnhancedFileStorage:
     def __init__(self, filename):
         self.filename = filename
 
-    def save(self, data, entity_id):
+    def create_table(self, entity_name):
+        """
+        Call the POST /entity endpoint to create a new table.
+        """
+        url = "http://localhost:8000/entity"
+        response = requests.post(url, json={"entity_name": entity_name})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
         """
         Save data by appending it to the REST API at zerokdbapi.
         """
