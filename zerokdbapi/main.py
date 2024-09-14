@@ -10,7 +10,7 @@ class Payload(BaseModel):
     data: dict
 
 
-@app.post("/save")
+@app.post("/save_sequence")
 async def save_sequence(payload: Payload):
     try:
         cid = ipfs_service.save_to_ipfs(payload.data)
