@@ -42,3 +42,17 @@ def update_table_sequence_cid(record_id: int, new_cid: str) -> TableSequences:
         raise e
     finally:
         session.close()
+def get_table_sequence_by_id(record_id: int) -> TableSequences:
+    """
+    Retrieve a record from the TableSequences model by its ID.
+    """
+    session: Session = SessionLocal()
+    try:
+        record = session.query(TableSequences).filter(TableSequences.id == record_id).first()
+        if not record:
+            raise ValueError(f"Record with id {record_id} not found.")
+        return record
+    except SQLAlchemyError as e:
+        raise e
+    finally:
+        session.close()
