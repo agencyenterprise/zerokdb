@@ -1,12 +1,10 @@
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
 import json
 
 
 class ContractController:
     def __init__(self, provider_url, contract_address, abi_path):
         self.web3 = Web3(Web3.HTTPProvider(provider_url))
-        self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
         self.contract_address = Web3.toChecksumAddress(contract_address)
         with open(abi_path, "r") as abi_file:
             self.abi = json.load(abi_file)
