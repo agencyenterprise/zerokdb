@@ -1,4 +1,9 @@
-const { expect } = require("chai");
+let expect;
+
+before(async () => {
+  const chai = await import("chai");
+  expect = chai.expect;
+});
 
 describe("TableSequences", function () {
   let TableSequences;
