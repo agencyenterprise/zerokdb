@@ -24,6 +24,7 @@ describe("TableSequences", function () {
     expect(receipt.events.length).to.equal(1);
     const event = receipt.events[0];
     expect(event.event).to.equal("SequenceCreated");
+    console.log(event.args.id)
     expect(event.args.id).to.equal(1);
     expect(event.args.tableName).to.equal("TestTable");
     expect(event.args.cid).to.equal("CID123");
