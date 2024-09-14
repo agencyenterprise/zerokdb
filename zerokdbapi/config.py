@@ -1,15 +1,16 @@
-import os
-from dotenv import load_dotenv
+from pydantic import BaseSettings
 
-# Load environment variables from .env file
-load_dotenv()
+class Settings(BaseSettings):
+    database_url: str
+    pinata_api_key: str
+    pinata_secret_api_key: str
+    provider_url: str
+    contract_address: str
+    abi_path: str
+    from_address: str
+    private_key: str
 
-# Retrieve environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
-PINATA_API_KEY = os.getenv("PINATA_API_KEY")
-PINATA_SECRET_API_KEY = os.getenv("PINATA_SECRET_API_KEY")
-PROVIDER_URL = os.getenv("PROVIDER_URL")
-CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS")
-ABI_PATH = os.getenv("ABI_PATH")
-FROM_ADDRESS = os.getenv("FROM_ADDRESS")
-PRIVATE_KEY = os.getenv("PRIVATE_KEY")
+    class Config:
+        env_file = ".env"
+
+settings = Settings()
