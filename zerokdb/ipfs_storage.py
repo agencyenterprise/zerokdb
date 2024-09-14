@@ -41,15 +41,7 @@ class IPFSStorage:
         if not self.cid:
             return {}
         # Use Pinata to retrieve data from IPFS using CID
-        headers = {
-            "pinata_api_key": "your_pinata_api_key",
-            "pinata_secret_api_key": "your_pinata_secret_api_key",
-        }
-        response = requests.get(f"https://gateway.pinata.cloud/ipfs/{self.cid}", headers=headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            response.raise_for_status()
+        return self.read_from_ipfs(self.cid)
 
     def append_linked_data(self, new_data):
         """
@@ -71,11 +63,7 @@ class IPFSStorage:
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
 
         # Step 4: Use the FastAPI REST API to save the new chunk to IPFS and get the new CID
-        response = requests.post("http://localhost:8000/save", json={"data": chunk})
-        if response.status_code == 200:
-            new_cid = response.json()["cid"]
-        else:
-            response.raise_for_status()
+        new_cid = self.call_rest_api("save", {"data": chunk})["cid"]
 
         # Step 5: Update the sequence with the new chunk details
         chunk_entry = {"chunk_id": new_cid, "chunk_hash": chunk_hash}
