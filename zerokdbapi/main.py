@@ -13,9 +13,8 @@ class Payload(BaseModel):
 @app.post("/save_sequence")
 async def save_sequence(payload: Payload):
     try:
-        # Append new data to the sequence and save to IPFS
-        sequence_data = ipfs_service.append_to_sequence(payload.data)
-        cid = ipfs_service.save_to_ipfs(sequence_data)
+        # Save the new data directly to IPFS
+        cid = ipfs_service.save_to_ipfs(payload.data)
         return {"cid": cid}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
