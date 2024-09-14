@@ -16,14 +16,6 @@ class IPFSStorage:
         pinata = PinataPy('your_pinata_api_key', 'your_pinata_secret_api_key')
         response = pinata.pin_json_to_ipfs(data)
         return response['IpfsHash']
-        """
-        Utility function to call the FastAPI REST API.
-        """
-        response = requests.post(f"http://localhost:8000/{endpoint}", json=payload)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            response.raise_for_status()
 
     def read_from_ipfs(self, cid):
         """
