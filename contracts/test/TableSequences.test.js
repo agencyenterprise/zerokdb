@@ -1,11 +1,9 @@
 let expect;
 
 before(async () => {
-  const chai = require("chai");
-  const chaiAsPromised = require("chai-as-promised");
-  const chaiEthers = require("chai-ethers");
-  chai.use(chaiAsPromised);
-  chai.use(chaiEthers);
+  const chai = await import("chai");
+  const { solidity } = require("ethereum-waffle")
+  chai.use(solidity)
   expect = chai.expect;
 });
 

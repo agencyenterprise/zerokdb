@@ -28,7 +28,7 @@ class ContractController:
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
         # Assuming the event is named "SequenceCreated" and has the fields id, tableName, and cid
         event = self.contract.events.SequenceCreated().process_receipt(tx_receipt)
-        return event[0]['args'] if event else None
+        return event[0]["args"] if event else None
 
     def update_sequence_cid(self, sequence_id, new_cid, from_address, private_key):
         nonce = self.web3.eth.get_transaction_count(from_address)
@@ -48,3 +48,16 @@ class ContractController:
 
     def get_sequence_by_id(self, sequence_id):
         return self.contract.functions.getSequenceById(sequence_id).call()
+
+
+def contract_controller():
+    provider_url = "http://localhost:8545"  # Local Ethereum node
+    contract_address = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"  # Replace with your deployed contract address
+    abi_path = "contracts/artifacts/contracts/TableSequences.sol/TableSequences.json"  # Replace with the path to your contract's ABI
+    return ContractController(provider_url, contract_address, abi_path)
+
+
+def account_details():
+    from_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"  # Replace with your Ethereum address
+    private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"  # Replace with your private key
+    return from_address, private_key

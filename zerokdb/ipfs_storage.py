@@ -2,6 +2,9 @@ import json
 from typing import Optional, Dict, Any, TypedDict, Union, List
 import hashlib
 import requests
+from zerokdb.config import settings
+from tenacity import retry, wait_exponential
+import time
 
 
 class TableData(TypedDict):
@@ -27,11 +30,15 @@ class IPFSStorage:
         """
         url = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
         headers = {
-            "pinata_api_key": "your_pinata_api_key",
-            "pinata_secret_api_key": "your_pinata_secret_api_key",
+            "Authorization": f"Bearer {settings.pinata_api_key}",
             "Content-Type": "application/json",
         }
-        response = requests.post(url, headers=headers, json=data)
+        payload = {
+            "pinataOptions": {"cidVersion": 1},
+            "pinataMetadata": {"name": "table"},
+            "pinataContent": data,
+        }
+        response = requests.post(url, headers=headers, json=payload)
         if response.status_code == 200:
             return response.json()["IpfsHash"]
         else:
@@ -43,8 +50,8 @@ class IPFSStorage:
         """
         url = f"https://gateway.pinata.cloud/ipfs/{cid}"
         headers = {
-            "pinata_api_key": "your_pinata_api_key",
-            "pinata_secret_api_key": "your_pinata_secret_api_key",
+            "Authorization": f"Bearer {settings.pinata_api_key}",
+            "Content-Type": "application/json",
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -52,6 +59,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
+    @retry(wait=wait_exponential(min=4, max=10))
     def read_from_ipfs_raw(self, cid: str) -> bytes:
         """
         Directly read raw data from IPFS using Pinata.
@@ -61,8 +69,10 @@ class IPFSStorage:
 
         # Fetch the file
         response = requests.get(gateway_url)
-        response.raise_for_status()  # Raise an error for bad responses
-        return response.content
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
 
     def load(self, cid: Optional[str] = None) -> Dict[str, TableData]:
         """
@@ -73,15 +83,16 @@ class IPFSStorage:
         if not self.cid:
             return {}
         # Use Pinata to retrieve data from IPFS using CID
-        return self.read_from_ipfs_raw(self.cid)
+        return self.read_from_ipfs_pinata(self.cid)
 
     def append_data(self, new_data: Dict[str, TableData], cid_sequence: str) -> str:
         """
         Append new data to IPFS and update the CID sequence.
         """
+        start = time.time()
         # Step 1: Retrieve the current CID sequence from IPFS
         current_sequence = self.load_sequence(cid_sequence)
-
+        print(f"Loaded CID sequence in {time.time() - start} seconds")
         # Step 2: Create a new chunk with the new data and a reference to the previous chunk
         chunk = new_data
 
@@ -90,10 +101,10 @@ class IPFSStorage:
             "utf-8"
         )  # Hash only the 'data' part
         chunk_hash = hashlib.sha256(chunk_hash_data).hexdigest()
-
+        print(f"Computed chunk hash in {time.time() - start} seconds")
         # Step 4: Save the new chunk to IPFS using Pinata and get the new CID
         new_cid = self.save(chunk)
-
+        print(f"Saved new chunk in {time.time() - start} seconds")
         # Step 5: Update the sequence with the new chunk details
         chunk_entry = {"chunk_id": new_cid, "chunk_hash": chunk_hash}
         current_sequence["default_sequence"].append(chunk_entry)
@@ -122,7 +133,7 @@ class IPFSStorage:
 
         # Step 7: Save the updated CID sequence to IPFS and store its CID
         cid_sequence_cid = self.save(current_sequence)
-
+        print(f"Saved updated CID sequence in {time.time() - start} seconds")
         print(f"New chunk CID: {new_cid}")
         print(f"Updated CID sequence CID: {cid_sequence_cid}")
 
@@ -140,7 +151,7 @@ class IPFSStorage:
                 "latest_chunk": None,
             }
         # Load the current CID sequence using the utility function
-        sequence_data: CIDSequence = self.read_from_ipfs_raw(cid_sequence)
+        sequence_data: CIDSequence = self.read_from_ipfs_pinata(cid_sequence)
         return sequence_data
 
     def get_cid_sequence(self, cid_sequence: str) -> CIDSequence:

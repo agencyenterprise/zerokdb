@@ -162,4 +162,30 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 *.json
+!package.json
+!contracts/artifacts/contracts/TableSequences.sol/TableSequences.json
 .vscode
+node_modules
+.env
+
+# Hardhat files
+/cache
+/artifacts
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+contracts/cache
+*.lock
+
+# test file
+a.py
+
+*.db

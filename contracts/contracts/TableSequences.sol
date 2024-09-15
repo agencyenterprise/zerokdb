@@ -13,7 +13,10 @@ contract TableSequences {
     event SequenceCreated(uint256 id, string tableName, string cid);
     event SequenceUpdated(uint256 id, string newCid);
 
-    function createSequence(string memory tableName, string memory cid) public returns (uint256) {
+    function createSequence(
+        string memory tableName,
+        string memory cid
+    ) public returns (uint256) {
         uint256 currentId = nextId;
         sequences[currentId] = Sequence(currentId, tableName, cid);
         nextId++;
@@ -27,7 +30,9 @@ contract TableSequences {
         emit SequenceUpdated(id, newCid);
     }
 
-    function getSequenceById(uint256 id) public view returns (uint256, string memory, string memory) {
+    function getSequenceById(
+        uint256 id
+    ) public view returns (uint256, string memory, string memory) {
         require(sequences[id].id != 0, "Sequence does not exist.");
         Sequence memory sequence = sequences[id];
         return (sequence.id, sequence.tableName, sequence.cid);
