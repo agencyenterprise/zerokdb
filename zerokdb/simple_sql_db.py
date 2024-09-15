@@ -24,10 +24,15 @@ class SimpleSQLDatabase:
             self.change_tracker.log_change(query, self.tables)
         if query.startswith("CREATE TABLE"):
             self._create_table(query)
-            self.storage.save(self.tables)
+            self.storage.create_table(table_name)
+            self.storage.save(self.tables, table_name)
         elif query.startswith("INSERT INTO"):
             self._insert_into(query)
+            self.storage.save(self.tables, table_name)
         elif query.startswith("SELECT"):
+            result = self._select(query)
+            self.storage.save(self.tables, table_name)
+            return result
             self.storage.save(self.tables)
             return self._select(query)
 
