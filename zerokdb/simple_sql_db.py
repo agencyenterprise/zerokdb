@@ -30,8 +30,8 @@ class SimpleSQLDatabase:
             table_name = self._insert_into(query)
             self.storage.save(self.tables, table_name)
         elif query.startswith("SELECT"):
+            self.tables = self.storage.load() or {}
             result = self._select(query)
-            self.storage.save(self.tables)
             return result
 
         elif query.startswith("CREATE INDEX"):
