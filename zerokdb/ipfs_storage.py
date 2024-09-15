@@ -38,7 +38,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
-    def read_from_ipfs(self, cid: str) -> Dict[str, Any]:
+    def read_from_ipfs_pinata(self, cid: str) -> Dict[str, Any]:
         """
         Utility function to read data from IPFS using Pinata.
         """
@@ -70,7 +70,7 @@ class IPFSStorage:
         if not self.cid:
             return {}
         # Use Pinata to retrieve data from IPFS using CID
-        return self.read_from_ipfs(self.cid)
+        return self.read_from_ipfs_raw(self.cid)
 
     def append_data(self, new_data: Dict[str, TableData], cid_sequence: str) -> str:
         """
@@ -137,7 +137,7 @@ class IPFSStorage:
                 "latest_chunk": None,
             }
         # Load the current CID sequence using the utility function
-        sequence_data: CIDSequence = self.read_from_ipfs(cid_sequence)
+        sequence_data: CIDSequence = self.read_from_ipfs_raw(cid_sequence)
         return sequence_data
 
     def get_cid_sequence(self, cid_sequence: str) -> CIDSequence:
