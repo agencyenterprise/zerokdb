@@ -4,33 +4,51 @@ import numpy as np
 from zerokdb.change_tracker import ChangeTracker
 from typing import Optional, Union
 from zerokdb.file_storage import FileStorage
-from zerokdb.ipfs_storage import IPFSStorage
 from zerokdb.enhanced_file_storage import EnhancedFileStorage
+import time
 
 
 class SimpleSQLDatabase:
     def __init__(
         self,
-        storage: EnhancedFileStorage,
+        storage: Union[EnhancedFileStorage, FileStorage],
         change_tracker: Optional[ChangeTracker] = None,
+        cid: Optional[str] = "0x0",
+        sequence_cid: Optional[str] = "0x0",
+        table_id: Optional[str] = None,
+        entityid: Optional[str] = None,
     ):
+        self.cid = cid
+        self.sequence_cid = sequence_cid
+        self.entityid = entityid
         self.storage = storage
         self.change_tracker = change_tracker
-        self.tables = self.storage.load() or {}
+        self.tables = self.storage.load(cid) if cid else {}
 
-    def execute(self, query: str):
+    def execute(
+        self, query: str, cid: Optional[str] = None, sequence_cid: Optional[str] = None
+    ):
         query = query.strip()
+        self.cid = cid or self.cid
+        self.sequence_cid = sequence_cid or self.sequence_cid
         if self.change_tracker:
             self.change_tracker.log_change(query, self.tables)
         if query.startswith("CREATE TABLE"):
             table_name = self._create_table(query)
-            self.storage.create_table(table_name)
-            self.storage.save(self.tables, table_name)
+            storage_data = self.storage.create_table(table_name, self.tables)
+            self.cid = storage_data.get("data_cid", None)
+            self.sequence_cid = storage_data.get("sequence_cid", None)
+            # self.storage.save(self.tables, table_name)
         elif query.startswith("INSERT INTO"):
+            start = time.time()
             table_name = self._insert_into(query)
-            self.storage.save(self.tables, table_name)
+            print(f"Inserted data locally in {time.time() - start} seconds")
+            storage_data = self.storage.save(self.tables, table_name)
+            print(f"Saved updated data on IPFS in {time.time() - start} seconds")
+            self.cid = storage_data.get("data_cid", None)
+            self.sequence_cid = storage_data.get("sequence_cid", None)
         elif query.startswith("SELECT"):
-            self.tables = self.storage.load() or {}
+            self.tables = self.storage.load(self.sequence_cid) or {}
             result = self._select(query)
             return result
 
@@ -64,6 +82,7 @@ class SimpleSQLDatabase:
             "rows": [],
             "indexes": {},
         }
+        return table_name
 
     def _insert_into(self, query: str):
         match = re.match(
