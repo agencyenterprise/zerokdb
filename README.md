@@ -1,6 +1,8 @@
-# ZeroKDB
+# ZEROKDB
 
-ZeroKDB is a lightweight, file-based database system with support for basic SQL operations and vector similarity search. It is designed to be simple and easy to use, making it ideal for small projects or educational purposes.
+ZEROKDB is a lightweight protocol and file-based database system with support for basic SQL operations and vector similarity search. It is designed to be simple and easy to use and fully decentralized. By being part of the [0k labs ecosystem](https://0k.wtf), ZEROKDB it's powered by ZKPs (Zero-Knowledge Proofs) acting as reward confirmation for users providing idle hardware to run the protocol. The rewards are granted in APTOS
+
+![ZEROKDB](docs/zerokdb.png)
 
 ## Features
 
@@ -10,6 +12,9 @@ ZeroKDB is a lightweight, file-based database system with support for basic SQL 
 - IPFS support for distributed storage.
 - Decentralized version controll powered by a smart contract
 - Change tracking for database operations.
+
+
+
 
 ## Installation
 
