@@ -1,5 +1,6 @@
 import json
 from typing import Optional, Dict, Any, TypedDict, Union, List
+from typing import Union
 import hashlib
 import requests
 
@@ -11,7 +12,10 @@ class TableData(TypedDict):
     indexes: Dict[str, Any]
 
 
-class UsersData(TypedDict):
+class CIDSequence(TypedDict):
+    default_sequence: List[Dict[str, str]]
+    chunk_history: List[Dict[str, List[str]]]
+    latest_chunk: Optional[str]
     users: TableData
     default_sequence: list[Dict[str, str]]
     chunk_history: list[Dict[str, list[str]]]
