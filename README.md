@@ -60,13 +60,43 @@ To limit the number of results returned, use the `LIMIT` clause:
 SELECT * FROM users LIMIT 10
 ```
 
-## Testing
+## Running Tests
 
-To run the tests, use the following command:
+To run the tests for this project, follow these steps:
 
-```bash
-pytest tests/
-```
+1. **Start the local Hardhat node:**
+
+   Open a terminal and run the following command to start a local Ethereum node using Hardhat:
+
+   ```bash
+   npx hardhat node
+   ```
+
+2. **Deploy the contract:**
+
+   In a new terminal, deploy the contract to the local Hardhat network:
+
+   ```bash
+   npx hardhat run contracts/scripts/deploy.js --network localhost
+   ```
+
+3. **Run Hardhat tests:**
+
+   Execute the tests for the smart contracts:
+
+   ```bash
+   npx hardhat test
+   ```
+
+4. **Run FastAPI with Uvicorn:**
+
+   Start the FastAPI server using Uvicorn:
+
+   ```bash
+   uvicorn zerokdbapi.main:app --reload
+   ```
+
+   The API will be available at `http://127.0.0.1:8000`.
 
 ## Contributing
 
