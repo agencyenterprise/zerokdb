@@ -1,6 +1,5 @@
 import json
 from typing import Optional, Dict, Any, TypedDict, Union, List
-from typing import Union
 import hashlib
 import requests
 
@@ -16,17 +15,13 @@ class CIDSequence(TypedDict):
     default_sequence: List[Dict[str, str]]
     chunk_history: List[Dict[str, List[str]]]
     latest_chunk: Optional[str]
-    users: TableData
-    default_sequence: list[Dict[str, str]]
-    chunk_history: list[Dict[str, list[str]]]
-    latest_chunk: Optional[str]
 
 
 class IPFSStorage:
     def __init__(self):
         self.cid: Optional[str] = None  # This will hold the latest data chunk CID
 
-    def save(self, data: Dict[str, Any]) -> str:
+    def save(self, data: Dict[str, TableData]) -> str:
         """
         Save data to IPFS using Pinata SDK and return the CID.
         """
@@ -58,7 +53,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
-    def load(self, cid: Optional[str] = None) -> Dict[str, Any]:
+    def load(self, cid: Optional[str] = None) -> Dict[str, TableData]:
         """
         Load data from IPFS using a given CID or the stored CID.
         """
@@ -69,17 +64,15 @@ class IPFSStorage:
         # Use Pinata to retrieve data from IPFS using CID
         return self.read_from_ipfs(self.cid)
 
-    def append_data(self, new_data: Dict[str, Any]) -> str:
+    def append_data(self, new_data: Dict[str, TableData], cid_sequence: str) -> str:
         """
         Append new data to IPFS and update the CID sequence.
         """
         # Step 1: Retrieve the current CID sequence from IPFS
-        current_sequence = self.load_sequence()
+        current_sequence = self.load_sequence(cid_sequence)
 
         # Step 2: Create a new chunk with the new data and a reference to the previous chunk
-        chunk = {
-            "data": new_data,
-        }
+        chunk = new_data
 
         # Step 3: Compute the hash of the chunk's data (excluding the next reference)
         chunk_hash_data = json.dumps(new_data).encode(
@@ -124,20 +117,26 @@ class IPFSStorage:
 
         return new_cid, cid_sequence_cid
 
-    def load_sequence(self, cid_sequence_cid: str) -> CIDSequence:
+    def load_sequence(self, cid_sequence: str) -> CIDSequence:
         """
         Load the CID sequence from IPFS. If no sequence exists, return a default structure.
         """
-
+        if cid_sequence == "0x0":
+            # Return a default CID sequence structure
+            return {
+                "default_sequence": [],
+                "chunk_history": [],
+                "latest_chunk": None,
+            }
         # Load the current CID sequence using the utility function
-        sequence_data: CIDSequence = self.read_from_ipfs(cid_sequence_cid)
+        sequence_data: CIDSequence = self.read_from_ipfs(cid_sequence)
         return sequence_data
 
-    def get_cid_sequence(self) -> CIDSequence:
+    def get_cid_sequence(self, cid_sequence: str) -> CIDSequence:
         """
         Return the stored sequence of CIDs from IPFS.
         """
-        return self.load_sequence()
+        return self.load_sequence(cid_sequence)
 
     def download_table(self, table_name: str) -> Dict[str, Any]:
         """
@@ -162,12 +161,12 @@ class IPFSStorage:
 
         return merged_data
 
-    def download_db(self, table_name: str) -> Dict[str, Any]:
+    def download_db(self, cid_sequence: str) -> Dict[str, TableData]:
         """
         Download all chunks into a single JSON where the rows are the union of all rows.
         """
-        sequence: CIDSequence = self.load_sequence()
-        merged_data = {}
+        sequence: CIDSequence = self.load_sequence(cid_sequence)
+        merged_data: Dict[str, TableData] = {}
 
         for chunk_entry in sequence.get("default_sequence", []):
             chunk = self.load(chunk_entry["chunk_id"])
