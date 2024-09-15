@@ -53,7 +53,21 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
-    def load(self, cid: Optional[str] = None) -> Dict[str, TableData]:
+    def read_from_ipfs_raw(self, cid: str) -> bytes:
+        """
+        Directly read raw data from IPFS using Pinata.
+        """
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+        }
+        response = requests.get(
+            f"https://gateway.pinata.cloud/ipfs/{cid}", headers=headers
+        )
+        if response.status_code == 200:
+            return response.content
+        else:
+            response.raise_for_status()
         """
         Load data from IPFS using a given CID or the stored CID.
         """
