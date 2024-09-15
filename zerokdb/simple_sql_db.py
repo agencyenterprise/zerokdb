@@ -23,18 +23,16 @@ class SimpleSQLDatabase:
         if self.change_tracker:
             self.change_tracker.log_change(query, self.tables)
         if query.startswith("CREATE TABLE"):
-            self._create_table(query)
+            table_name = self._create_table(query)
             self.storage.create_table(table_name)
             self.storage.save(self.tables, table_name)
         elif query.startswith("INSERT INTO"):
-            self._insert_into(query)
+            table_name = self._insert_into(query)
             self.storage.save(self.tables, table_name)
         elif query.startswith("SELECT"):
             result = self._select(query)
-            self.storage.save(self.tables, table_name)
-            return result
             self.storage.save(self.tables)
-            return self._select(query)
+            return result
 
         elif query.startswith("CREATE INDEX"):
             self._create_index(query)
@@ -101,6 +99,7 @@ class SimpleSQLDatabase:
             elif col_type == "list[float]":
                 converted_values.append([float(x) for x in val.strip("[]").split(",")])
         table["rows"].append(converted_values)
+        return table_name
 
     def _create_index(self, query: str):
         match = re.match(r"CREATE INDEX (\w+) ON (\w+) \((.+)\)", query)
