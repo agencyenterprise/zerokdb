@@ -68,6 +68,8 @@ class IPFSStorage:
             return response.content
         else:
             response.raise_for_status()
+
+    def load(self, cid: Optional[str] = None) -> Dict[str, TableData]:
         """
         Load data from IPFS using a given CID or the stored CID.
         """
