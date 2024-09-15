@@ -5,12 +5,13 @@ from zerokdb.change_tracker import ChangeTracker
 from typing import Optional, Union
 from zerokdb.file_storage import FileStorage
 from zerokdb.ipfs_storage import IPFSStorage
+from zerokdb.enhanced_file_storage import EnhancedFileStorage
 
 
 class SimpleSQLDatabase:
     def __init__(
         self,
-        storage: Union[FileStorage, IPFSStorage],
+        storage: EnhancedFileStorage,
         change_tracker: Optional[ChangeTracker] = None,
     ):
         self.storage = storage
