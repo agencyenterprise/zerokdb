@@ -7,7 +7,8 @@ ZeroKDB is a lightweight, file-based database system with support for basic SQL 
 - Create, insert, and query tables using SQL-like syntax.
 - Support for various data types including strings, integers, floats, booleans, datetimes, and lists of floats.
 - Perform cosine similarity searches on vector data.
-- File-based storage with optional IPFS support for distributed storage.
+- IPFS support for distributed storage.
+- Decentralized version controll powered by a smart contract
 - Change tracking for database operations.
 
 ## Installation
@@ -64,6 +65,19 @@ SELECT * FROM users LIMIT 10
 
 To run the tests for this project, follow these steps:
 
+0. **Configure your .env file**
+
+   Create a .env file out of the .env.example file on the root folder:
+   ```bash
+   PROVIDER_URL="http://localhost:8545"  # Local Ethereum node
+   CONTRACT_ADDRESS="0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"  # Replace with your deployed contract address
+   ABI_PATH="contracts/artifacts/contracts/TableSequences.sol/TableSequences.json"  # Replace with the path to your contract's ABI
+   FROM_ADDRESS="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"  # Replace with your Ethereum address (Default from local hardhat node)
+   PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"  # Replace with your private key (Default from local hardhat node)
+   PINATA_API_KEY=
+   API_HOST="http://localhost:8000"
+   ```
+
 1. **Start the local Hardhat node:**
 
    Open a terminal and run the following command to start a local Ethereum node using Hardhat:
@@ -97,6 +111,24 @@ To run the tests for this project, follow these steps:
    ```
 
    The API will be available at `http://127.0.0.1:8000`.
+
+5. **Run the python tests:**
+   ```bash
+   pytest
+   ```
+
+## NOTES:
+
+Although the database nodes can be fully decentralized, this project relies on a central authority for persisting data on ipfs. 
+
+### Forking the protocol
+If you wanna setup and run your own application our of **zerokdb**, you will have to configure a pinata account capable of pinning files to IPFS, and you must
+deploy the rest api present on the ```zerokdbapi/``` folder.
+- Consider running the REST API on akash to have a decentralized infraestructure. 
+
+### Running a node
+If you just wanna run your own node in the **zerokdb** network you will need a pinata account to read from IPFS. 
+
 
 ## Contributing
 
