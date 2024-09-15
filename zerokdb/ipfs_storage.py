@@ -1,6 +1,5 @@
 import json
-from typing import List, Dict, TypedDict
-from typing import Optional, Dict, Any, TypedDict
+from typing import Optional, Dict, Any, TypedDict, Union, List
 import hashlib
 import requests
 
@@ -10,6 +9,7 @@ class TableData(TypedDict):
     column_types: Dict[str, str]
     rows: List[List[Union[int, str]]]
     indexes: Dict[str, Any]
+
 
 class UsersData(TypedDict):
     users: TableData
