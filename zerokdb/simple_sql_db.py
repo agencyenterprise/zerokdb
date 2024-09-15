@@ -85,39 +85,41 @@ class SimpleSQLDatabase:
         return table_name
 
     def _insert_into(self, query: str):
-        match = re.match(
-            r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query, re.DOTALL
-        )
+        match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES (.+)", query, re.DOTALL)
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
         columns = [col.strip() for col in columns.split(",")]
-        values = [
-            val.strip()
-            for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)
-        ]
+        values_list = re.findall(r"\((.*?)\)", values, re.DOTALL)
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         table = self.tables[table_name]
         if columns != table["columns"]:
             raise ValueError("Column names do not match")
-        # Validate and convert values based on column types
-        converted_values = []
-        for col, val in zip(columns, values):
-            col_type = table["column_types"][col]
-            if col_type == "int":
-                converted_values.append(int(val))
-            elif col_type == "float":
-                converted_values.append(float(val))
-            elif col_type == "bool":
-                converted_values.append(val.lower() in ["true", "1"])
-            elif col_type == "string":
-                converted_values.append(val.strip("'"))
-            elif col_type == "datetime":
-                converted_values.append(datetime.datetime.fromisoformat(val))
-            elif col_type == "list[float]":
-                converted_values.append([float(x) for x in val.strip("[]").split(",")])
-        table["rows"].append(converted_values)
+        for values in values_list:
+            values = [
+                val.strip()
+                for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)
+            ]
+            # Validate and convert values based on column types
+            converted_values = []
+            for col, val in zip(columns, values):
+                col_type = table["column_types"][col]
+                if col_type == "int":
+                    converted_values.append(int(val))
+                elif col_type == "float":
+                    converted_values.append(float(val))
+                elif col_type == "bool":
+                    converted_values.append(val.lower() in ["true", "1"])
+                elif col_type == "string":
+                    converted_values.append(val.strip("'"))
+                elif col_type == "datetime":
+                    converted_values.append(datetime.datetime.fromisoformat(val))
+                elif col_type == "list[float]":
+                    converted_values.append(
+                        [float(x) for x in val.strip("[]").split(",")]
+                    )
+            table["rows"].append(converted_values)
         return table_name
 
     def _create_index(self, query: str):
