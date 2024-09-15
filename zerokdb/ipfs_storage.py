@@ -1,6 +1,7 @@
 import json
 from typing import Optional, Dict, Any, TypedDict, Union, List
 import hashlib
+import requests
 import ipfshttpclient
 
 
@@ -25,17 +26,32 @@ class IPFSStorage:
         """
         Save data to IPFS using Pinata SDK and return the CID.
         """
-        with ipfshttpclient.connect() as client:
-            res = client.add_json(data)
-            return res
+        url = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+            "Content-Type": "application/json",
+        }
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            return response.json()["IpfsHash"]
+        else:
+            response.raise_for_status()
 
     def read_from_ipfs(self, cid: str) -> Dict[str, Any]:
         """
         Utility function to read data from IPFS using Pinata.
         """
-        with ipfshttpclient.connect() as client:
-            res = client.cat(cid)
-            return json.loads(res)
+        url = f"https://gateway.pinata.cloud/ipfs/{cid}"
+        headers = {
+            "pinata_api_key": "your_pinata_api_key",
+            "pinata_secret_api_key": "your_pinata_secret_api_key",
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
 
     def read_from_ipfs_raw(self, cid: str) -> bytes:
         """
