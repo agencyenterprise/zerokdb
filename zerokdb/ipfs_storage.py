@@ -2,7 +2,6 @@ import json
 from typing import Optional, Dict, Any, TypedDict, Union, List
 import hashlib
 import requests
-import ipfshttpclient
 
 
 class TableData(TypedDict):
@@ -57,9 +56,13 @@ class IPFSStorage:
         """
         Directly read raw data from IPFS using Pinata.
         """
-        with ipfshttpclient.connect() as client:
-            res = client.cat(cid)
-            return res
+        # Use a public IPFS gateway
+        gateway_url = f"https://ipfs.io/ipfs/{cid}"
+
+        # Fetch the file
+        response = requests.get(gateway_url)
+        response.raise_for_status()  # Raise an error for bad responses
+        return response.content
 
     def load(self, cid: Optional[str] = None) -> Dict[str, TableData]:
         """
