@@ -163,3 +163,8 @@ cython_debug/
 #.idea/
 *.json
 .vscode
+
+# Web ignores
+node_modules/
+.env
+.next/
