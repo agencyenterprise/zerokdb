@@ -10,52 +10,89 @@ import React, {
 } from "react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { toast } from "react-toastify";
+
+const MODULE_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_ADDRESS || "";
 
 const ChainContext = createContext<{
   client?: Aptos;
   escrowBalance?: bigint;
-  fetchTokens?: () => Promise<void>;
+  handleBalance?: () => Promise<void>;
 }>({
   client: undefined,
   escrowBalance: undefined,
-  fetchTokens: undefined,
+  handleBalance: undefined,
 });
 
 export function ChainProvider({ children }: { children: React.ReactNode }) {
-  const { account } = useWallet();
+  const { account, signMessage } = useWallet();
   const [tokens, setTokens] = useState<any>();
 
   const aptos = useMemo(() => {
-    const config = new AptosConfig({ network: Network.TESTNET });
+    const config = new AptosConfig({ network: Network.DEVNET });
     return new Aptos(config);
   }, []);
 
-  const fetchTokens = useCallback(async () => {
+  const handleLogin = useCallback(async () => {
     if (account) {
-      const tokens = await aptos.getAccountOwnedTokens({
-        accountAddress: account.address,
-      });
-      console.log("test tokens", tokens);
-      setTokens(tokens);
+      try {
+        const nonceValue = await fetch("/api/auth/nonce").then((res) =>
+          res.text(),
+        );
 
-      /*await aptos.fundAccount({
-        accountAddress: account.address,
-        amount: 100000000,
-      });*/
+        const signature = await signMessage({
+          message: `Login to ZerokDB. Nonce: ${nonceValue}`,
+          nonce: nonceValue,
+          address: true,
+        });
+
+        await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...signature,
+            publicKey: account.publicKey,
+          }),
+        });
+      } catch (error) {
+        const message = "Error logging in";
+        console.error(message, error);
+        toast.error(message);
+      }
+    }
+  }, [account, signMessage]);
+
+  const handleBalance = useCallback(async () => {
+    if (account) {
+      console.log("getting balance");
+      const response = await aptos.view({
+        payload: {
+          function: `${MODULE_ADDRESS}::escrow_native::balance_of`,
+          functionArguments: [account.address],
+        },
+      });
+      console.log("response balance", response);
+
+      setTokens(0);
     }
   }, [account, aptos]);
 
   useEffect(() => {
-    fetchTokens();
-  }, [account, fetchTokens]);
+    if (account) {
+      handleLogin();
+      handleBalance();
+    }
+  }, [account]);
 
   const value = useMemo(
     () => ({
       client: aptos,
       escrowBalance: tokens?.[0],
-      fetchTokens,
+      handleBalance,
     }),
-    [aptos, tokens, fetchTokens],
+    [aptos, tokens, handleBalance],
   );
 
   return (

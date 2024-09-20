@@ -7,13 +7,13 @@ import { OKXWallet } from "@okwallet/aptos-wallet-adapter";
 import { Network } from "@aptos-labs/ts-sdk";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
-  const wallets = [new PetraWallet(), new OKXWallet()];
+  const wallets = [new PetraWallet()];
 
   return (
     <AptosWalletAdapterProvider
       plugins={wallets}
       autoConnect={true}
-      dappConfig={{ network: Network.TESTNET }}
+      dappConfig={{ network: Network.DEVNET }}
       onError={(error) => {
         console.log("error", error);
       }}

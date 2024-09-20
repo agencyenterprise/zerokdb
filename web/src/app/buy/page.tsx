@@ -9,6 +9,8 @@ import { useState } from "react";
 import Loading from "@/components/loading";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 
+const MODULE_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_ADDRESS || "";
+
 type Tier = {
   name: string;
   id: string;
@@ -21,25 +23,25 @@ const tiers: Tier[] = [
   {
     name: "Basic",
     id: "tier-basic",
-    price: "0.01",
+    price: "1",
     description: "The essentials to start some DB requests",
-    features: ["Cheapest option", "Up to 10 queries aprox"],
+    features: ["Cheapest option", "Up to 8 queries aprox"],
   },
   {
     name: "Advanced",
     id: "tier-advanced",
-    price: "0.02",
+    price: "3",
     description: "A pack that can get you a long way.",
     features: [
       "Most popular",
-      "Up to 30 queries aprox",
+      "Up to 40 queries aprox",
       "Can handle complex queries",
     ],
   },
   {
     name: "Professional",
     id: "tier-professional",
-    price: "0.1",
+    price: "10",
     description: "A pack for heavy users.",
     features: [
       "Up to 100 queires aprox",
@@ -61,19 +63,62 @@ const tiers: Tier[] = [
 
 export default function BuyPage() {
   const [loading, setLoading] = useState<boolean>(false);
-  const [customPrice, setCustomPrice] = useState<string>("0.5");
-  const { client } = useChain();
-  const { account } = useWallet();
+  const [customPrice, setCustomPrice] = useState<string>("20");
+  const { client, handleBalance } = useChain();
+  const { account, signAndSubmitTransaction } = useWallet();
 
   const handleBuy = async (tier: Tier) => {
-    if (!client || !account) {
+    if (!client || !account || !signAndSubmitTransaction) {
       toast.error("Make sure your wallet is connected");
       return;
     }
     setLoading(true);
 
     try {
-      toast.info("Depositing credits...");
+      const priceString = tier?.price || customPrice;
+      const priceAPT = parseFloat(priceString);
+      const amountOctas = Math.floor(priceAPT * 1e8); // Convert APT to Octas
+      const TRANSFER_AMOUNT = amountOctas.toString();
+
+      console.log("amountOctas", amountOctas);
+      console.log("TRANSFER_AMOUNT", TRANSFER_AMOUNT);
+
+      const accountResources = await client.getAccountResources({
+        accountAddress: account.address,
+      });
+      console.log("accountResources", accountResources);
+      const coinStore = accountResources.find(
+        (resource) =>
+          resource.type === "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
+      );
+
+      console.log("coinStore", coinStore);
+
+      if (!coinStore) {
+        throw new Error("AptosCoin not registered for this account.");
+      }
+
+      const balance = parseInt((coinStore.data as any).coin.value, 10);
+      if (balance < amountOctas) {
+        throw new Error("Insufficient AptosCoin balance.");
+      }
+
+      // Sign and submit the transaction
+      const response = await signAndSubmitTransaction({
+        sender: account.address,
+        data: {
+          function: `${MODULE_ADDRESS}::escrow_native::deposit`,
+          functionArguments: [amountOctas],
+        },
+      });
+
+      console.log("response.hash", response.hash);
+
+      // Wait for transaction confirmation
+      await client.waitForTransaction(response.hash);
+      await handleBalance?.();
+
+      toast.success("Credits deposited successfully!");
     } catch (e) {
       console.log("error", e);
       toast.error("Error on credits deposit, " + e);
