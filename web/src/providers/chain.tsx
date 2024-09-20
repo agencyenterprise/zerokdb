@@ -75,7 +75,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
       });
       console.log("response balance", response);
 
-      setTokens(0);
+      setTokens(response?.[0] || 0);
     }
   }, [account, aptos]);
 

@@ -115,7 +115,7 @@ export default function BuyPage() {
       console.log("response.hash", response.hash);
 
       // Wait for transaction confirmation
-      await client.waitForTransaction(response.hash);
+      await client.waitForTransaction({ transactionHash: response.hash });
       await handleBalance?.();
 
       toast.success("Credits deposited successfully!");
