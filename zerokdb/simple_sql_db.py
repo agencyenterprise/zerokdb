@@ -4,31 +4,53 @@ import numpy as np
 from zerokdb.change_tracker import ChangeTracker
 from typing import Optional, Union
 from zerokdb.file_storage import FileStorage
-from zerokdb.ipfs_storage import IPFSStorage
+from zerokdb.enhanced_file_storage import EnhancedFileStorage
+import time
 
 
 class SimpleSQLDatabase:
     def __init__(
         self,
-        storage: Union[FileStorage, IPFSStorage],
+        storage: Union[EnhancedFileStorage, FileStorage],
         change_tracker: Optional[ChangeTracker] = None,
+        cid: Optional[str] = "0x0",
+        sequence_cid: Optional[str] = "0x0",
+        table_id: Optional[str] = None,
+        entityid: Optional[str] = None,
     ):
+        self.cid = cid
+        self.sequence_cid = sequence_cid
+        self.entityid = entityid
         self.storage = storage
         self.change_tracker = change_tracker
-        self.tables = self.storage.load() or {}
+        self.tables = self.storage.load(cid) if cid else {}
 
-    def execute(self, query: str):
+    def execute(
+        self, query: str, cid: Optional[str] = None, sequence_cid: Optional[str] = None
+    ):
         query = query.strip()
+        self.cid = cid or self.cid
+        self.sequence_cid = sequence_cid or self.sequence_cid
         if self.change_tracker:
             self.change_tracker.log_change(query, self.tables)
         if query.startswith("CREATE TABLE"):
-            self._create_table(query)
-            self.storage.save(self.tables)
+            table_name = self._create_table(query)
+            storage_data = self.storage.create_table(table_name, self.tables)
+            self.cid = storage_data.get("data_cid", None)
+            self.sequence_cid = storage_data.get("sequence_cid", None)
+            # self.storage.save(self.tables, table_name)
         elif query.startswith("INSERT INTO"):
-            self._insert_into(query)
+            start = time.time()
+            table_name = self._insert_into(query)
+            print(f"Inserted data locally in {time.time() - start} seconds")
+            storage_data = self.storage.save(self.tables, table_name)
+            print(f"Saved updated data on IPFS in {time.time() - start} seconds")
+            self.cid = storage_data.get("data_cid", None)
+            self.sequence_cid = storage_data.get("sequence_cid", None)
         elif query.startswith("SELECT"):
-            self.storage.save(self.tables)
-            return self._select(query)
+            self.tables = self.storage.load(self.sequence_cid) or {}
+            result = self._select(query)
+            return result
 
         elif query.startswith("CREATE INDEX"):
             self._create_index(query)
@@ -60,41 +82,45 @@ class SimpleSQLDatabase:
             "rows": [],
             "indexes": {},
         }
+        return table_name
 
     def _insert_into(self, query: str):
-        match = re.match(
-            r"INSERT INTO (\w+) \((.+)\) VALUES \((.+)\)", query, re.DOTALL
-        )
+        match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES (.+)", query, re.DOTALL)
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
         columns = [col.strip() for col in columns.split(",")]
-        values = [
-            val.strip()
-            for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)
-        ]
+        values_list = re.findall(r"\((.*?)\)", values, re.DOTALL)
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         table = self.tables[table_name]
         if columns != table["columns"]:
             raise ValueError("Column names do not match")
-        # Validate and convert values based on column types
-        converted_values = []
-        for col, val in zip(columns, values):
-            col_type = table["column_types"][col]
-            if col_type == "int":
-                converted_values.append(int(val))
-            elif col_type == "float":
-                converted_values.append(float(val))
-            elif col_type == "bool":
-                converted_values.append(val.lower() in ["true", "1"])
-            elif col_type == "string":
-                converted_values.append(val.strip("'"))
-            elif col_type == "datetime":
-                converted_values.append(datetime.datetime.fromisoformat(val))
-            elif col_type == "list[float]":
-                converted_values.append([float(x) for x in val.strip("[]").split(",")])
-        table["rows"].append(converted_values)
+        for values in values_list:
+            values = [
+                val.strip()
+                for val in re.split(r",(?=(?:[^\[\]]*\[[^\[\]]*\])*[^\[\]]*$)", values)
+            ]
+            # Validate and convert values based on column types
+            converted_values = []
+            for col, val in zip(columns, values):
+                col_type = table["column_types"][col]
+                if col_type == "int":
+                    converted_values.append(int(val))
+                elif col_type == "float":
+                    converted_values.append(float(val))
+                elif col_type == "bool":
+                    converted_values.append(val.lower() in ["true", "1"])
+                elif col_type == "string":
+                    converted_values.append(val.strip("'"))
+                elif col_type == "datetime":
+                    converted_values.append(datetime.datetime.fromisoformat(val))
+                elif col_type == "list[float]":
+                    converted_values.append(
+                        [float(x) for x in val.strip("[]").split(",")]
+                    )
+            table["rows"].append(converted_values)
+        return table_name
 
     def _create_index(self, query: str):
         match = re.match(r"CREATE INDEX (\w+) ON (\w+) \((.+)\)", query)
