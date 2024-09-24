@@ -168,3 +168,29 @@ cython_debug/
 node_modules/
 .env
 .next/
+!package.json
+!contracts/artifacts/contracts/TableSequences.sol/TableSequences.json
+.vscode
+node_modules
+
+# Hardhat files
+/cache
+/artifacts
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+contracts/cache
+*.lock
+
+# test file
+a.py
+
+*.db
