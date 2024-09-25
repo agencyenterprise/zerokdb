@@ -1,0 +1,19 @@
+[package]
+name = "0k"
+version = "1.0.0"
+authors = []
+
+[addresses]
+escrow_native = "0x96454d517c001d18e342cb9e231bb0b6cf71d6f695913c25a7bcaf3c775fdbb1"
+table_sequences = "0x96454d517c001d18e342cb9e231bb0b6cf71d6f695913c25a7bcaf3c775fdbb1"
+
+[dev-addresses]
+escrow_native = "0x10"
+table_sequences = "0x20"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dev-dependencies]
