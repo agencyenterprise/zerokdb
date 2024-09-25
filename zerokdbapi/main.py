@@ -8,6 +8,7 @@ from zerokdbapi.controller import (
     get_table_sequence_by_id,
     get_table_sequence_by_table_name,
 )
+from zerokdbapi.api.table_sequence import router as TableSequenceRouter
 from zerokdbapi.contract_controller import ContractController
 from zerokdbapi.config import settings
 from fastapi.concurrency import run_in_threadpool
@@ -18,6 +19,7 @@ contract_controller = ContractController(
 
 app = FastAPI()
 
+app.include_router(TableSequenceRouter, prefix="/table-sequence", include_in_schema=False)
 
 class TableData(BaseModel):
     columns: List[str]
