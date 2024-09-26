@@ -21,6 +21,7 @@ python-dotenv = "^1.0.1"
 tenacity = ">=8.1.0,<9"
 pydantic-settings = "^2.5.2"
 uvicorn = "^0.30.6"
+aptos-sdk = "^0.9.1"
 
 
 [tool.poetry.group.dev.dependencies]

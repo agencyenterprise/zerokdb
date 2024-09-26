@@ -1,9 +1,10 @@
 import json
 import os
 from fastapi import APIRouter, Depends
-from src.blockchain.aptos.TableSequenceClient import TableSequenceClient
 from aptos_sdk.account import Account
 from typing import Tuple
+
+from zerokdbapi.TableSequenceClient import TableSequenceClient
 
 router = APIRouter()
 
