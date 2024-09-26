@@ -83,12 +83,21 @@ module table_sequences::table_sequences {
     }
 
     #[view]
-    public fun get_sequence_by_id(addr: address, id: u64): (u64, String, String) acquires Sequences {
+    public fun get_sequence_by_table_name(addr: address, table_name: String): (u64, String, String) acquires Sequences {
         assert!(exists<Sequences>(addr), error::not_found(EALREADY_INITIALIZED));
         let sequences = borrow_global<Sequences>(addr);
-        assert!(table::contains(&sequences.sequences, id), ESEQUENCE_NOT_EXIST);
-        let sequence = table::borrow(&sequences.sequences, id);
-        (sequence.id, sequence.table_name, sequence.cid)
+        let mut_ref = &sequences.sequences;
+        let i = 1;
+        while (i <= sequences.next_id - 1) {
+            if (table::contains(mut_ref, i)) {
+                let sequence = table::borrow(mut_ref, i);
+                if (sequence.table_name == table_name) {
+                    return (sequence.id, sequence.table_name, sequence.cid)
+                };
+            };
+            i = i + 1;
+        };
+        abort ESEQUENCE_NOT_EXIST
     }
 
     #[test(admin = @0x123)]
@@ -124,14 +133,14 @@ module table_sequences::table_sequences {
     }
 
     #[test(admin = @0x123)]
-    public entry fun test_get_sequence_by_id(admin: &signer) acquires Sequences {
+    public entry fun test_get_sequence_by_table_name(admin: &signer) acquires Sequences {
         let admin_addr = signer::address_of(admin);
         account::create_account_for_test(admin_addr);
 
         initialize(admin);
         create_sequence(admin, string::utf8(b"TestTable"), string::utf8(b"CID123"));
 
-        let (id, table_name, cid) = get_sequence_by_id(admin_addr, 1);
+        let (id, table_name, cid) = get_sequence_by_table_name(admin_addr, string::utf8(b"TestTable"));
         assert!(id == 1, 0);
         assert!(table_name == string::utf8(b"TestTable"), 1);
         assert!(cid == string::utf8(b"CID123"), 2);
@@ -145,7 +154,7 @@ module table_sequences::table_sequences {
 
         initialize(admin);
 
-        get_sequence_by_id(admin_addr, 999);
+        get_sequence_by_table_name(admin_addr, string::utf8(b"NonExistentTable"));
     }
 
     #[test(admin = @0x123)]
@@ -158,7 +167,7 @@ module table_sequences::table_sequences {
 
         update_sequence_cid(admin, 1, string::utf8(b"CID456"));
 
-        let (_, _, new_cid) = get_sequence_by_id(admin_addr, 1);
+        let (_, _, new_cid) = get_sequence_by_table_name(admin_addr, string::utf8(b"TestTable"));
         assert!(new_cid == string::utf8(b"CID456"), 0);
     }
 
