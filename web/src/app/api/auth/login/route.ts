@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { verifySignature } from "@/utils/auth";
+import { verifySignature } from "@/utils/authServer";
 
 const BACKEND_AUTH_TOKEN =
   process.env.BACKEND_AUTH_TOKEN || "your_BACKEND_AUTH_TOKEN_key";
@@ -31,14 +31,14 @@ export async function POST(request: NextRequest) {
 
   if (isValid) {
     const token = jwt.sign({ address: signature.address }, BACKEND_AUTH_TOKEN, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
 
     const response = NextResponse.json({ success: true });
 
     // Set JWT cookie and delete nonce cookie
     response.cookies.set("jwt", token, {
-      httpOnly: true,
+      httpOnly: false,
       path: "/",
       maxAge: 604800, // 1 week
       sameSite: "strict",
