@@ -48,7 +48,8 @@ class SimpleSQLDatabase:
             self.cid = storage_data.get("data_cid", None)
             self.sequence_cid = storage_data.get("sequence_cid", None)
         elif query.startswith("SELECT"):
-            self.tables = self.storage.load(self.sequence_cid) or {}
+            table_name = self.parse_select_query(query)[1]
+            self.tables = self.storage.load(table_name) or {}
             result = self._select(query)
             return result
 
@@ -142,7 +143,7 @@ class SimpleSQLDatabase:
             index[key].append(row)
         table["indexes"][index_name] = index
 
-    def _select(self, query):
+    def parse_select_query(self, query):
         match = re.match(
             r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: GROUP BY (.+))?(?: ORDER BY (.+))?(?: LIMIT (\d+))?(?: COSINE SIMILARITY (.+))?$",
             query,
@@ -158,6 +159,26 @@ class SimpleSQLDatabase:
             limit_clause,
             cosine_similarity_clause,
         ) = match.groups()
+        return (
+            columns,
+            table_name,
+            where_clause,
+            group_by_clause,
+            order_by_clause,
+            limit_clause,
+            cosine_similarity_clause,
+        )
+
+    def _select(self, query):
+        (
+            columns,
+            table_name,
+            where_clause,
+            group_by_clause,
+            order_by_clause,
+            limit_clause,
+            cosine_similarity_clause,
+        ) = self.parse_select_query(query)
         columns = [col.strip() for col in columns.split(",")]
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
