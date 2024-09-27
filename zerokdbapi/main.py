@@ -12,6 +12,7 @@ from zerokdbapi.api.table_sequence import router as TableSequenceRouter
 from zerokdbapi.contract_controller import ContractController
 from zerokdbapi.config import settings
 from fastapi.concurrency import run_in_threadpool
+from zerokdbapi.TextToEmbedding import TextToEmbedding
 
 contract_controller = ContractController(
     settings.provider_url, settings.contract_address, settings.abi_path
@@ -20,7 +21,7 @@ contract_controller = ContractController(
 app = FastAPI()
 
 app.include_router(
-    TableSequenceRouter, prefix="/table-sequence", include_in_schema=False
+    TableSequenceRouter, prefix="/sequence", include_in_schema=False
 )
 
 
@@ -39,6 +40,9 @@ class AppendDataPayload(BaseModel):
 class EntityPayload(BaseModel):
     entity_name: str
     data: Dict[str, Any]
+
+class EmbeddingPayload(BaseModel):
+    text: str
 
 
 class EntityName(BaseModel):
@@ -178,5 +182,21 @@ async def dappend_data(payload: AppendDataPayload, entity_id: str):
             entity_id, cid_sequence, settings.from_address, settings.private_key
         )
         return {"data_cid": data_cid, "sequence_cid": cid_sequence}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/convert-to-embedding")
+async def convert_to_embedding(payload: EmbeddingPayload):
+    try:
+        text = payload.text
+        # Instantiate the TextToEmbedding class
+        text_to_embedding = TextToEmbedding()
+        # Use the instance to call the convert method
+        embedding = text_to_embedding.convert(text)
+
+        if not isinstance(embedding, list):
+            raise HTTPException(status_code=500, detail="Failed to generate valid embedding.")
+
+        return {"embedding": embedding}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
