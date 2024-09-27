@@ -61,8 +61,8 @@ export async function GET(
       );
     }
 
-    // Return the proof request as a JSON response with a 200 OK status
-    return NextResponse.json(response.json(), { status: 200 });
+    const data = await response.json();
+    return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
     console.error("Error in GET /api/hub/request/[id]:", error);
     return NextResponse.json(

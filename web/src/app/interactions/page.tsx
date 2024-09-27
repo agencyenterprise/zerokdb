@@ -112,7 +112,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
           const data = await res.json();
 
           if (data.status === "generated") {
-            setResponse(JSON.parse(data.payload));
+            setResponse(data?.payload && JSON.parse(data.payload));
             setPolling(false);
             clearInterval(intervalId);
             toast.success("Response generated successfully!");
@@ -154,7 +154,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
               role="alert"
             >
               <p>
-                You must have you wallet connected and some credits to do a
+                You must have your wallet connected and some credits to do a
                 request
               </p>
               <p className="font-bold">
@@ -268,42 +268,26 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
             {response && (
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-tertiary-700 text-secondary-100">
-                  <thead>
-                    <tr>
-                      {response?.headers?.map(
-                        (header: { key: string; name: string }) => (
-                          <th
-                            key={header.key}
-                            className="py-2 px-4 border-b border-secondary-500 text-left"
-                          >
-                            {header.name}
-                          </th>
-                        ),
-                      )}
-                    </tr>
-                  </thead>
                   <tbody>
-                    {response?.body?.map(
-                      (row: { [key: string]: string }, rowIndex: number) => (
-                        <tr key={rowIndex} className="hover:bg-tertiary-600">
-                          {response?.headers?.map((header: { key: string }) => (
-                            <td
-                              key={header?.key}
-                              className="py-2 px-4 border-b border-secondary-500"
-                            >
-                              {row?.[header?.key] || ""}
-                            </td>
-                          ))}
-                        </tr>
-                      ),
-                    )}
-                    {response?.body?.length === 0 && (
+                    {response?.map((row: any[], rowIndex: number) => (
+                      <tr key={rowIndex} className="hover:bg-tertiary-600">
+                        {row.map((cell, cellIndex) => (
+                          <td
+                            key={cellIndex}
+                            className="py-2 px-4 border-b border-secondary-500"
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                    {response?.length === 0 && (
                       <tr>
                         <td
-                          colSpan={response?.headers?.length}
+                          colSpan={1}
                           className="py-2 px-4 border-b border-secondary-500 text-center"
                         >
-                          No results
+                          No result
                         </td>
                       </tr>
                     )}
