@@ -95,7 +95,7 @@ export default function InteractionsHistoryPage() {
                 <p className="text-left text-sm text-secondary-200">
                   Paid to worker:{" "}
                   <Link
-                    href={`https://explorer.aptoslabs.com/account/${request.worker_wallet}?network=devnet`}
+                    href={`https://explorer.aptoslabs.com/account/${request.worker_wallet}?network=testnet`}
                     target="_blank"
                     className="underline text-primary-500 hover:text-primary-400"
                   >
@@ -143,7 +143,7 @@ export default function InteractionsHistoryPage() {
               <p className="text-left text-sm text-secondary-200">
                 Paid to worker:{" "}
                 <Link
-                  href={`https://explorer.aptoslabs.com/account/${selectedRequest.worker_wallet}?network=devnet`}
+                  href={`https://explorer.aptoslabs.com/account/${selectedRequest.worker_wallet}?network=testnet`}
                   target="_blank"
                   className="underline text-primary-500 hover:text-primary-400"
                 >
@@ -152,6 +152,34 @@ export default function InteractionsHistoryPage() {
               </p>
             )}
         </div>
+
+        {payload?.length > 0 && (
+          <>
+            <h2 className="text-xl font-semibold text-secondary-100 py-4 text-center mt-4">
+              Results
+            </h2>
+            <div className="p-4 bg-tertiary-800 border border-secondary-500 rounded-lg shadow w-full">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-secondary-100">
+                  <tbody>
+                    {payload?.map((row: any[], rowIndex: number) => (
+                      <tr key={rowIndex} className="hover:bg-tertiary-600">
+                        {row.map((cell, cellIndex) => (
+                          <td
+                            key={cellIndex}
+                            className="py-2 px-4 border-b border-secondary-500"
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex justify-center mt-8">
           <Button

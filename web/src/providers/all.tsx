@@ -13,7 +13,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
     <AptosWalletAdapterProvider
       plugins={wallets}
       autoConnect={true}
-      dappConfig={{ network: Network.DEVNET }}
+      dappConfig={{ network: Network.TESTNET }}
       onError={(error) => {
         console.log("error", error);
       }}

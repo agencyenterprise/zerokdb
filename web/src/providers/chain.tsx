@@ -30,7 +30,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokens] = useState<any>();
 
   const aptos = useMemo(() => {
-    const config = new AptosConfig({ network: Network.DEVNET });
+    const config = new AptosConfig({ network: Network.TESTNET });
     return new Aptos(config);
   }, []);
 

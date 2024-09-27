@@ -21,7 +21,7 @@ export default function InteractionsPage() {
   const { client, escrowBalance } = useChain();
   const [formData, setFormData] = useState<FormData>({});
   const [requestId, setRequestId] = useState<string>();
-  const [response, setResponse] = useState<any>();
+  const [requestResponse, setRequestResponse] = useState<any>();
   const [polling, setPolling] = useState(false);
 
   const sqlParser = useMemo(() => new Parser(), []);
@@ -112,7 +112,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
           const data = await res.json();
 
           if (data.status === "generated") {
-            setResponse(data?.payload && JSON.parse(data.payload));
+            //setRequestResponse(data?.payload && JSON.parse(data.payload));
             setPolling(false);
             clearInterval(intervalId);
             toast.success("Response generated successfully!");
@@ -168,7 +168,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
             <Loading size="500px" />
           </div>
         ) : (
-          <div className="mb-6 px-4">
+          <div className="mb-2 px-4">
             <form onSubmit={handleRequest}>
               <div className="flex flex-row gap-4 w-full pb-6">
                 <Button
@@ -256,8 +256,8 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
         )}
 
         {requestId && (
-          <div className="px-4 py-6 bg-tertiary-800 rounded-lg mt-8">
-            <h2 className="text-xl font-semibold text-secondary-100 mb-4">
+          <div className="px-4">
+            <h2 className="text-xl font-semibold text-secondary-100 mb-4 text-center">
               Results
             </h2>
             {polling && (
@@ -265,11 +265,11 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
                 <Loading size="200px" />
               </div>
             )}
-            {response && (
+            {requestResponse && (
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-tertiary-700 text-secondary-100">
+                <table className="min-w-full bg-[#1e1e1e] p-4">
                   <tbody>
-                    {response?.map((row: any[], rowIndex: number) => (
+                    {requestResponse?.map((row: any[], rowIndex: number) => (
                       <tr key={rowIndex} className="hover:bg-tertiary-600">
                         {row.map((cell, cellIndex) => (
                           <td
@@ -281,7 +281,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
                         ))}
                       </tr>
                     ))}
-                    {response?.length === 0 && (
+                    {requestResponse?.length === 0 && (
                       <tr>
                         <td
                           colSpan={1}
