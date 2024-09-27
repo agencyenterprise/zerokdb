@@ -1,20 +1,23 @@
 import pytest
 from zerokdbapi.contract_controller import ContractController
 from uuid import uuid4
+from zerokdbapi.config import settings
 
 
 @pytest.fixture
 def contract_controller():
     provider_url = "http://localhost:8545"  # Local Ethereum node
-    contract_address = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"  # Replace with your deployed contract address
+    contract_address = (
+        settings.contract_address
+    )  # Replace with your deployed contract address
     abi_path = "contracts/artifacts/contracts/TableSequences.sol/TableSequences.json"  # Replace with the path to your contract's ABI
     return ContractController(provider_url, contract_address, abi_path)
 
 
 @pytest.fixture
 def account_details():
-    from_address = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"  # Replace with your Ethereum address
-    private_key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"  # Replace with your private key
+    from_address = settings.from_address  # Replace with your Ethereum address
+    private_key = settings.private_key  # Replace with your private key
     return from_address, private_key
 
 

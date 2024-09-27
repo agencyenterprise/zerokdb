@@ -36,6 +36,10 @@ class EntityPayload(BaseModel):
     data: Dict[str, Any]
 
 
+class EntityName(BaseModel):
+    entity_name: str
+
+
 @app.get("/sequence/{entity_id}")
 async def get_cid_sequence(entity_id: str):
     try:
@@ -47,6 +51,24 @@ async def get_cid_sequence(entity_id: str):
         data = await run_in_threadpool(storage.load_sequence, sequence_cid)
         return data
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/sequence/name")
+async def get_cid_sequence_by_table_name(entity: EntityName):
+    try:
+        sequence = await run_in_threadpool(
+            get_table_sequence_by_table_name, entity.entity_name
+        )
+        if not sequence:
+            raise HTTPException(status_code=404, detail="Entity not found.")
+        return {
+            "id": sequence.id,
+            "table_name": sequence.table_name,
+            "sequence_cid": sequence.cid,
+        }
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

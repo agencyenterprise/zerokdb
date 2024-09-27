@@ -67,6 +67,7 @@ def get_table_sequence_by_table_name(table_name: str) -> TableSequences:
         record = (
             session.query(TableSequences)
             .filter(TableSequences.table_name == table_name)
+            .filter(TableSequences.cid is not None)
             .first()
         )
         return record
