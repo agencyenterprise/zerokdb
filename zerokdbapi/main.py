@@ -19,7 +19,10 @@ contract_controller = ContractController(
 
 app = FastAPI()
 
-app.include_router(TableSequenceRouter, prefix="/table-sequence", include_in_schema=False)
+app.include_router(
+    TableSequenceRouter, prefix="/table-sequence", include_in_schema=False
+)
+
 
 class TableData(BaseModel):
     columns: List[str]
