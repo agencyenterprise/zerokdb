@@ -62,12 +62,12 @@ class TableSequenceClient(RestClient):
         )
         return await self.submit_bcs_transaction(signed_transaction)
 
-    async def get_sequence_by_id(self, address: str, id: int) -> Tuple[int, str, str]:
-        """Get a sequence by its ID"""
+    async def get_sequence_by_table_name(self, address: str, table_name: str) -> Tuple[int, str, str]:
+        """Get a sequence by its table name"""
 
         result = await self.view(
-            f"{self.contract_address}::table_sequences::get_sequence_by_id",
+            f"{self.contract_address}::table_sequences::get_sequence_by_table_name",
             [],
-            [address.__str__(), str(id)],
+            [address.__str__(), table_name],
         )
         return result
