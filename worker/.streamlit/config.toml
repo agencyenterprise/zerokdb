@@ -1,0 +1,7 @@
+
+[global]
+developmentMode = false
+
+[server]
+port = 8502
+                
