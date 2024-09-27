@@ -42,13 +42,13 @@ async def update_sequence_cid_endpoint(
     return await client.update_sequence_cid(sender, id, new_cid)
 
 
-@router.get("/get-sequence-by-id")
+@router.get("/name")
 async def get_sequence_by_id_endpoint(
     address: str,
-    id: int,
+    table_name: str,
     client: TableSequenceClient = Depends(get_table_sequence_client)
 ) -> Tuple[int, str, str]:
-    result = await client.get_sequence_by_id(address, id)
+    result = await client.get_sequence_by_table_name(address, table_name)
     decoded_result = result.decode('utf-8')
     parsed_result = json.loads(decoded_result)
     return (int(parsed_result[0]), parsed_result[1], parsed_result[2])

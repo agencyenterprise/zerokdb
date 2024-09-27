@@ -20,7 +20,7 @@ contract_controller = ContractController(
 app = FastAPI()
 
 app.include_router(
-    TableSequenceRouter, prefix="/table-sequence", include_in_schema=False
+    TableSequenceRouter, prefix="/sequence", include_in_schema=False
 )
 
 
