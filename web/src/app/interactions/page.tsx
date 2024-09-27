@@ -64,6 +64,7 @@ export default function InteractionsPage() {
   };
 
   const isValidSql = (sql: string) => {
+    return true;
     try {
       if (!sql?.length) {
         return false;
@@ -82,6 +83,14 @@ export default function InteractionsPage() {
   };
 
   const handleDataExample = () => {
+    /*
+
+CREATE TABLE users (
+  id int,
+  name string,
+);
+
+INSERT INTO users (id, name) VALUES (1, 'Golden');*/
     const table = faker.food.adjective().replaceAll(" ", "_").toLowerCase();
     const example = faker.helpers.fake(
       `

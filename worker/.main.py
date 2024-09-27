@@ -105,7 +105,7 @@ def main():
     with col1:
         st.markdown('<div style="padding: 0px 0px 10px 0px">Start the worker to start earning rewards for verifying proofs.</div>', unsafe_allow_html=True)
 
-        wallet_address = st.text_input("Enter your BSC wallet address")
+        wallet_address = st.text_input("Enter your APTOS wallet address")
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
 
         # Button Area
