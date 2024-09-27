@@ -9,7 +9,7 @@ from zerokdbapi.TableSequenceClient import TableSequenceClient
 router = APIRouter()
 
 async def get_table_sequence_client():
-    node_url = os.getenv("APTOS_NODE_URL", "https://fullnode.devnet.aptoslabs.com/v1")
+    node_url = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
     return TableSequenceClient(node_url)
 
 async def get_sender():

@@ -38,7 +38,7 @@ yes
 package size 4403 bytes
 Do you want to submit a transaction for a range of [320500 - 480700] Octas at a gas unit price of 100 Octas? [yes/no] >
 yes
-Transaction submitted: https://explorer.aptoslabs.com/txn/0x5e89fedb0eb2aa6eb2ba4a317184492f2568a3904ac5ec53e01c4dc12881ef8a?network=devnet
+Transaction submitted: https://explorer.aptoslabs.com/txn/0x5e89fedb0eb2aa6eb2ba4a317184492f2568a3904ac5ec53e01c4dc12881ef8a?network=testnet
 Code was successfully deployed to object address 0x3668203b45b643a2d929f0db49852140fd96d190d1765e8bf0bc33f44716061b
 {
   "Result": "Success"
@@ -56,7 +56,7 @@ from aptos_sdk.account import Account, AccountAddress
 from blockchain.aptos.EscrowNativeClient import EscrowNativeClient
 
 async def main():
-    NODE_URL = os.getenv("APTOS_NODE_URL", "https://fullnode.devnet.aptoslabs.com/v1")
+    NODE_URL = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
     rest_client = RestClient(NODE_URL)
     escrow_client = EscrowNativeClient(rest_client)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 The Table Sequence contract provides functionality to create and manage sequences of data stored in tables on the Aptos blockchain. Here's how to use the TableSequenceClient to interact with this contract:
 
 ```python
-    NODE_URL = os.getenv("APTOS_NODE_URL", "https://fullnode.devnet.aptoslabs.com/v1")
+    NODE_URL = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
     rest_client = RestClient(NODE_URL)
     aptos_client = TableSequenceClient(NODE_URL)
     account = Account.load_key(os.getenv("APTOS_PRIVATE_KEY"))
