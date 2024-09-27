@@ -1,0 +1,17 @@
+[package]
+name = "0k"
+version = "1.0.0"
+authors = []
+
+[addresses]
+table_sequences = "_"
+
+[dev-addresses]
+table_sequences = "0x20"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dev-dependencies]
