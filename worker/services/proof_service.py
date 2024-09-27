@@ -1,7 +1,7 @@
-
 from zerokdb.api import DatabaseAPI
 
-def generate_proof(proof_request_id: str, ai_model_name: str, ai_model_inputs: str):
+
+async def generate_proof(proof_request_id: str, ai_model_name: str, ai_model_inputs: str):
   print('Generating proof for request ' + proof_request_id)
 
   if ai_model_name != 'zerokdb':
@@ -15,7 +15,6 @@ def generate_proof(proof_request_id: str, ai_model_name: str, ai_model_inputs: s
       result = db_api.execute_query(ai_model_inputs['value'])
   else:
       raise ValueError("Unsupported AI model input type")
-  print(result)
 
   circuit = "To be Done"
   proof = "To be Done"
