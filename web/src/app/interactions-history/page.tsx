@@ -13,7 +13,8 @@ type Request = {
   description: string;
   status: string;
   worker_wallet: string;
-  payload: string;
+  ai_model_output: string;
+  ai_model_inputs: string;
 };
 
 export default function InteractionsHistoryPage() {
@@ -69,7 +70,12 @@ export default function InteractionsHistoryPage() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
         {requests.map((request, index) => {
-          const payload = request?.payload && JSON.parse(request.payload);
+          const payload =
+            request?.ai_model_output && JSON.parse(request.ai_model_output);
+
+          const input =
+            request?.ai_model_inputs && JSON.parse(request.ai_model_inputs);
+
           return (
             <div
               key={index}
@@ -83,9 +89,9 @@ export default function InteractionsHistoryPage() {
               <p className="text-left text-sm text-secondary-200">
                 {`Status: ${request.status}`}
               </p>
-              {payload?.type && (
+              {input?.type && (
                 <p className="text-left text-sm text-secondary-200">
-                  {`Type: ${payload.type}`}
+                  {`Type: ${input.type}`}
                 </p>
               )}
               <p className="text-left text-sm text-secondary-200">
@@ -119,7 +125,12 @@ export default function InteractionsHistoryPage() {
     }
 
     const payload =
-      selectedRequest?.payload && JSON.parse(selectedRequest.payload);
+      selectedRequest?.ai_model_output &&
+      JSON.parse(selectedRequest.ai_model_output);
+
+    const input =
+      selectedRequest?.ai_model_inputs &&
+      JSON.parse(selectedRequest.ai_model_inputs);
 
     return (
       <div className="flex flex-col w-full">
@@ -130,9 +141,9 @@ export default function InteractionsHistoryPage() {
           <p className="text-left text-sm text-secondary-200">
             {`Status: ${selectedRequest.status}`}
           </p>
-          {payload?.type && (
+          {input?.type && (
             <p className="text-left text-sm text-secondary-200">
-              {`Type: ${payload.type}`}
+              {`Type: ${input.type}`}
             </p>
           )}
           <p className="text-left text-sm text-secondary-200">

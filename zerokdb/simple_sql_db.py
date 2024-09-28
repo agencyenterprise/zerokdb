@@ -41,15 +41,20 @@ class SimpleSQLDatabase:
             # self.storage.save(self.tables, table_name)
         elif query.startswith("INSERT INTO"):
             start = time.time()
-            table_name = self._insert_into(query)
+            table_name, _, _ = self._process_insert_into(query)
+            self.tables = self.storage.load(table_name) or {}
+
+            new_table_chunk = self._insert_into(query)
             print(f"Inserted data locally in {time.time() - start} seconds")
-            storage_data = self.storage.save(self.tables, table_name)
+            storage_data = self.storage.save(new_table_chunk, table_name)
+
             print(f"Saved updated data on IPFS in {time.time() - start} seconds")
             self.cid = storage_data.get("data_cid", None)
             self.sequence_cid = storage_data.get("sequence_cid", None)
         elif query.startswith("SELECT"):
             table_name = self.parse_select_query(query)[1]
             self.tables = self.storage.load(table_name) or {}
+            print('self tables', self.tables)
             result = self._select(query)
             return result
 
@@ -84,18 +89,21 @@ class SimpleSQLDatabase:
             "indexes": {},
         }
         return table_name
-
-    def _insert_into(self, query: str):
+    def _process_insert_into(self, query: str):
         match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES (.+)", query, re.DOTALL)
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
+        return table_name, columns, values
+    def _insert_into(self, query: str):
+        table_name, columns, values = self._process_insert_into(query)
         columns = [col.strip() for col in columns.split(",")]
         values_list = re.findall(r"\((.*?)\)", values, re.DOTALL)
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
-        table = self.tables[table_name]
-        if columns != table["columns"]:
+        new_table_chunk = self.tables.copy()
+        new_table_chunk[table_name]["rows"] = []
+        if columns != new_table_chunk[table_name]["columns"]:
             raise ValueError("Column names do not match")
         for values in values_list:
             values = [
@@ -105,7 +113,7 @@ class SimpleSQLDatabase:
             # Validate and convert values based on column types
             converted_values = []
             for col, val in zip(columns, values):
-                col_type = table["column_types"][col]
+                col_type = new_table_chunk[table_name]["column_types"][col]
                 if col_type == "int":
                     converted_values.append(int(val))
                 elif col_type == "float":
@@ -120,8 +128,8 @@ class SimpleSQLDatabase:
                     converted_values.append(
                         [float(x) for x in val.strip("[]").split(",")]
                     )
-            table["rows"].append(converted_values)
-        return table_name
+            new_table_chunk[table_name]["rows"].append(converted_values)
+        return new_table_chunk
 
     def _create_index(self, query: str):
         match = re.match(r"CREATE INDEX (\w+) ON (\w+) \((.+)\)", query)

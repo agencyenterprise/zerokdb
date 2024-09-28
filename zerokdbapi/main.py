@@ -66,6 +66,7 @@ async def get_cid_sequence(entity_id: str):
 @app.post("/sequence/name")
 async def get_cid_sequence_by_table_name(entity: EntityName):
     try:
+        print(entity)
         sequence = await run_in_threadpool(
             get_table_sequence_by_table_name, entity.entity_name
         )
@@ -105,6 +106,7 @@ async def create_entity(EntityPayload: EntityPayload):
             "sequence_cid": sequence.cid,
         }
     except Exception as e:
+        print('Error', e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

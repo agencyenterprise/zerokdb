@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
     const ai_model_inputs = data.semantic?.length
       ? { type: "TEXT", value: data.semantic }
-      : { type: "SQL", value: data.sql };
+      : { type: "SQL", value: data?.sql?.split(/\s+/)?.join(" ")?.trim() };
 
     const response = await fetch(`${backendUrl}/proof_requests`, {
       method: "POST",

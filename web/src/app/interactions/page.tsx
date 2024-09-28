@@ -8,8 +8,8 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import SqlInput from "@/components/sql-input";
 import Button from "@/components/button";
-import { Parser } from "node-sql-parser";
 import { faker } from "@faker-js/faker";
+import { isValidSql } from "@/utils/sql";
 
 type FormData = {
   semantic?: string;
@@ -23,8 +23,6 @@ export default function InteractionsPage() {
   const [requestId, setRequestId] = useState<string>();
   const [requestResponse, setRequestResponse] = useState<any>();
   const [polling, setPolling] = useState(false);
-
-  const sqlParser = useMemo(() => new Parser(), []);
 
   const handleRequest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,36 +61,25 @@ export default function InteractionsPage() {
     }
   };
 
-  const isValidSql = (sql: string) => {
-    try {
-      if (!sql?.length) {
-        return false;
-      }
-      sqlParser.astify(sql);
-      return true;
-    } catch (e) {
-      console.log("parse error:", e);
-      return false;
-    }
-  };
-
   const handleSelectExample = () => {
     const example = `SELECT * FROM users LIMIT 10`;
     setFormData({ ...formData, sql: example, semantic: "" });
   };
 
-  const handleDataExample = () => {
+  const handleTableExample = () => {
     const table = faker.food.adjective().replaceAll(" ", "_").toLowerCase();
-    const example = faker.helpers.fake(
-      `
+    const example = `
 CREATE TABLE ${table} (
-  id INT PRIMARY KEY,
-  name VARCHAR(255),
-  description TEXT
+  id int,
+  name string
 );
+      `;
+    setFormData({ ...formData, sql: example, semantic: "" });
+  };
 
-INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.description}}');
-      `,
+  const handleDataExample = () => {
+    const example = faker.helpers.fake(
+      `INSERT INTO users (id, name) VALUES (1, '{{food.dish}}');`,
     );
     setFormData({ ...formData, sql: example, semantic: "" });
   };
@@ -111,8 +98,10 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
         if (res.ok) {
           const data = await res.json();
 
-          if (data.status === "generated") {
-            //setRequestResponse(data?.payload && JSON.parse(data.payload));
+          if (data.status === "PROCESSED") {
+            setRequestResponse(
+              data?.ai_model_output && JSON.parse(data.ai_model_output),
+            );
             setPolling(false);
             clearInterval(intervalId);
             toast.success("Response generated successfully!");
@@ -132,8 +121,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
 
     if (requestId) {
       setPolling(true);
-      fetchResponse();
-      intervalId = setInterval(fetchResponse, 5000); // Poll every 5 seconds
+      intervalId = setInterval(fetchResponse, 8000);
     }
 
     return () => {
@@ -187,7 +175,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
                   send to the ZeroK decentralized database
                 </h2>
               </div>
-              <div className="mb-6">
+              {/*<div className="mb-6">
                 <label
                   htmlFor="semantic"
                   className="block mb-2 text-sm font-medium text-secondary-100"
@@ -207,7 +195,7 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
                     })
                   }
                 />
-              </div>
+              </div>*/}
 
               <div className="mb-6">
                 <label
@@ -232,6 +220,14 @@ INSERT INTO ${table} (id, name, temp) VALUES (1, '{{food.dish}}', '{{food.descri
                     className="w-40"
                     disabled={loading}
                     onClick={handleDataExample}
+                  />
+                  <Button
+                    type="button"
+                    id="table"
+                    label="Create Table"
+                    className="w-40"
+                    disabled={loading}
+                    onClick={handleTableExample}
                   />
                 </div>
               </div>
