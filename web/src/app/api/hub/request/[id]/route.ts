@@ -37,7 +37,7 @@ export async function GET(
     const backendAuthToken = process.env.HUB_AUTH_TOKEN || "";
 
     // Construct the backend API URL using owner_wallet and proofRequestId
-    const apiUrl = `${backendUrl}/${encodeURIComponent(
+    const apiUrl = `${backendUrl}/proof_requests/${encodeURIComponent(
       ownerWallet,
     )}/${encodeURIComponent(proofRequestId)}`;
 
