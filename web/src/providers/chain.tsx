@@ -11,6 +11,7 @@ import React, {
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 import { toast } from "react-toastify";
+import { isLoggedIn } from "@/utils/authClient";
 
 const MODULE_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_ADDRESS || "";
 
@@ -29,7 +30,7 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokens] = useState<any>();
 
   const aptos = useMemo(() => {
-    const config = new AptosConfig({ network: Network.DEVNET });
+    const config = new AptosConfig({ network: Network.TESTNET });
     return new Aptos(config);
   }, []);
 
@@ -81,7 +82,9 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (account) {
-      handleLogin();
+      if (!isLoggedIn()) {
+        handleLogin();
+      }
       handleBalance();
     }
   }, [account]);

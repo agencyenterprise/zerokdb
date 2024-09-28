@@ -135,7 +135,7 @@ export async function logout() {
   cookies().set({
     name: "jwt",
     value: "",
-    httpOnly: true,
+    httpOnly: false,
     path: "/",
     expires: new Date(0),
   });

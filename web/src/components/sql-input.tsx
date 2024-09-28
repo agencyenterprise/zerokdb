@@ -27,9 +27,11 @@ const SqlInput: React.FC<SqlInputProps> = ({
 
   return (
     <div>
-      {label && <h3>{label}</h3>}
+      {label && (
+        <label className="block mb-2 text-sm font-normal">{label}</label>
+      )}
       <MonacoEditor
-        height="400px"
+        height="200px"
         defaultLanguage="sql"
         theme="vs-dark"
         value={sqlString}
