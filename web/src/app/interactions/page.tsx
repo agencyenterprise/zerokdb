@@ -80,7 +80,7 @@ CREATE TABLE ${table} (
 
   const handleDataExample = () => {
     const example = faker.helpers.fake(
-      `INSERT INTO users (id, name) VALUES (1, '{{food.dish}}');`,
+      `INSERT INTO users (id, name) VALUES (1, '{{food.dish}}')`,
     );
     setFormData({ ...formData, sql: example, semantic: "", table: "" });
   };
