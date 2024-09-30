@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Dict, Any, TypedDict, Union, List
+from typing import Optional, Dict, Any, TypedDict, Union, List, Literal
 import hashlib
 import requests
 from zerokdb.config import settings
@@ -9,7 +9,9 @@ import time
 
 class TableData(TypedDict):
     columns: List[str]
-    column_types: Dict[str, str]
+    column_types: Dict[
+        str, Literal["int", "float", "bool", "string", "datetime", "list[float]"]
+    ]
     rows: List[List[Union[int, str]]]
     indexes: Dict[str, Any]
 
