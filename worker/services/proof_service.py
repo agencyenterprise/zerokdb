@@ -10,7 +10,7 @@ async def generate_proof(
 
     if ai_model_name != "zerokdb":
         return None, None
-    db_api = DatabaseAPI(storage_type="ipfs")  # TODO change for being IPFS
+    db_api = DatabaseAPI(storage_type="ipfs")
     ai_model_inputs_dict = json.loads(ai_model_inputs)
 
     if ai_model_inputs_dict["type"] == "TEXT":

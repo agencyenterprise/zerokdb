@@ -12,6 +12,7 @@ import { faker } from "@faker-js/faker";
 import { isValidSql } from "@/utils/sql";
 
 type FormData = {
+  table?: string;
   semantic?: string;
   sql?: string;
 };
@@ -63,7 +64,7 @@ export default function InteractionsPage() {
 
   const handleSelectExample = () => {
     const example = `SELECT * FROM users LIMIT 10`;
-    setFormData({ ...formData, sql: example, semantic: "" });
+    setFormData({ ...formData, sql: example, semantic: "", table: "" });
   };
 
   const handleTableExample = () => {
@@ -74,14 +75,14 @@ CREATE TABLE ${table} (
   name string
 );
       `;
-    setFormData({ ...formData, sql: example, semantic: "" });
+    setFormData({ ...formData, sql: example, semantic: "", table: "" });
   };
 
   const handleDataExample = () => {
     const example = faker.helpers.fake(
       `INSERT INTO users (id, name) VALUES (1, '{{food.dish}}');`,
     );
-    setFormData({ ...formData, sql: example, semantic: "" });
+    setFormData({ ...formData, sql: example, semantic: "", table: "" });
   };
 
   useEffect(() => {
@@ -166,7 +167,8 @@ CREATE TABLE ${table} (
                   className="w-40"
                   disabled={
                     (!isValidSql(formData?.sql ?? "") &&
-                      !formData?.semantic?.length) ||
+                      (!formData?.semantic?.length ||
+                        !formData?.table?.length)) ||
                     !escrowBalance
                   }
                 />
@@ -175,27 +177,50 @@ CREATE TABLE ${table} (
                   send to the ZeroK decentralized database
                 </h2>
               </div>
-              {/*<div className="mb-6">
-                <label
-                  htmlFor="semantic"
-                  className="block mb-2 text-sm font-medium text-secondary-100"
-                >
-                  Semantic Search
-                </label>
-                <input
-                  type="text"
-                  id="semantic"
-                  className="bg-tertiary-800 border border-secondary-500 text-secondary-100 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"
-                  value={formData.semantic}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      semantic: e.target.value,
-                      sql: "",
-                    })
-                  }
-                />
-              </div>*/}
+              <div className="flex w-full gap-3 mb-6">
+                <div className="flex-1">
+                  <label
+                    htmlFor="semantic"
+                    className="block mb-2 text-sm font-medium text-secondary-100"
+                  >
+                    Semantic Search
+                  </label>
+                  <input
+                    type="text"
+                    id="semantic"
+                    className="bg-tertiary-800 border border-secondary-500 text-secondary-100 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"
+                    value={formData.semantic}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        semantic: e.target.value,
+                        sql: "",
+                      })
+                    }
+                  />
+                </div>
+                <div className=" ">
+                  <label
+                    htmlFor="semantic"
+                    className="block mb-2 text-sm font-medium text-secondary-100"
+                  >
+                    From Table{" "}
+                  </label>
+                  <input
+                    type="text"
+                    id="table"
+                    className="bg-tertiary-800 border border-secondary-500 text-secondary-100 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"
+                    value={formData.table}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        table: e.target.value,
+                        sql: "",
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
               <div className="mb-6">
                 <label
@@ -235,7 +260,12 @@ CREATE TABLE ${table} (
                 label="Raw SQL Query"
                 sqlString={formData?.sql ?? ""}
                 setSqlString={(text) =>
-                  setFormData({ ...formData, sql: text, semantic: "" })
+                  setFormData({
+                    ...formData,
+                    sql: text,
+                    semantic: "",
+                    table: "",
+                  })
                 }
               />
               <div className="mt-6 flex flex-col items-end justify-end">

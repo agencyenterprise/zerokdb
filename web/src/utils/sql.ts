@@ -156,28 +156,64 @@ const validateInsert = (sql: string) => {
  * @param {string} sql - The cleaned SQL CREATE TABLE statement.
  * @returns {boolean} - True if valid, else false.
  */
-const validateCreateTable = (sql: string) => {
+const validateCreateTable = (sql: string): boolean => {
   // Regular expression to capture table name and columns
-  const createTableRegex = /^CREATE TABLE\s+[\w]+\s*\(([^)]+)\);?$/i;
+  const createTableRegex = /^CREATE TABLE\s+(\w+)\s*\(([^)]+)\);?$/i;
   const match = sql.match(createTableRegex);
   if (!match) {
     return false; // Invalid CREATE TABLE statement format
   }
 
-  const columnsPart = match[1];
+  const table = match[1].trim();
+  const columnsPart = match[2].trim();
+
+  // 1. Ensure table name is valid
+  if (!table || !/^\w+$/i.test(table)) return false;
+
+  // 2. Split column definitions by comma
   const columns = columnsPart.split(",").map((col) => col.trim());
 
   if (columns.length === 0) {
     return false; // No columns defined
   }
 
-  // Validate each column has a name and type
+  // 3. Define allowed base data types and complex types
+  const allowedBaseTypes = ["INT", "STRING", "FLOAT"];
+
+  const allowedComplexTypes = ["LIST"];
+
+  // 4. Validate each column definition
   for (let column of columns) {
-    // A simple regex to check for "name type"
-    if (!/^[\w]+[\s]+[\w]+$/i.test(column)) {
+    // Regular expression to capture column name and type
+    // Supports complex types like list[float]
+    const columnRegex = /^(\w+)\s+([\w]+(?:\s*\[\s*\w+\s*\])?)$/i;
+    const colMatch = column.match(columnRegex);
+    if (!colMatch) {
       return false; // Column definition is invalid
     }
-    // Optionally, validate the data type against a list of allowed types
+
+    const colName = colMatch[1].trim();
+    const colType = colMatch[2].trim().toUpperCase();
+
+    // Ensure column name is valid
+    if (!/^\w+$/i.test(colName)) return false;
+
+    // Check if type is a base type
+    if (allowedBaseTypes.includes(colType)) {
+      continue;
+    }
+
+    // Check for complex types like LIST[FLOAT]
+    const complexTypeMatch = colType.match(/^(\w+)\s*\[\s*(\w+)\s*\]$/);
+    if (complexTypeMatch) {
+      const baseType = complexTypeMatch[1].trim();
+      const innerType = complexTypeMatch[2].trim();
+
+      if (!allowedComplexTypes.includes(baseType)) return false;
+      if (!allowedBaseTypes.includes(innerType)) return false;
+    } else {
+      return false; // Type is neither a base type nor a supported complex type
+    }
   }
 
   return true;
