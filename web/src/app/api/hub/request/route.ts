@@ -41,8 +41,12 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         chain: "aptos_testnet",
         owner_wallet: ownerWallet,
-        name: ai_model_inputs.value.substring(0, 30),
-        description: ai_model_inputs.value,
+        name: data.semantic?.length
+          ? ai_model_inputs?.value?.text?.substring(0, 30)
+          : ai_model_inputs?.value?.substring(0, 30),
+        description: data.semantic?.length
+          ? ai_model_inputs?.value?.text
+          : ai_model_inputs?.value,
         ai_model_name: "zerokdb",
         ai_model_inputs: JSON.stringify(ai_model_inputs),
       }),
