@@ -6,9 +6,12 @@ from typing import Optional, Union
 from zerokdb.file_storage import FileStorage
 from zerokdb.enhanced_file_storage import EnhancedFileStorage
 import time
+from zerokdb.zk.table_parser import generate_proof_of_membership
 
 
 class SimpleSQLDatabase:
+    selected_columns = []
+
     def __init__(
         self,
         storage: Union[EnhancedFileStorage, FileStorage],
@@ -26,7 +29,11 @@ class SimpleSQLDatabase:
         self.tables = self.storage.load(cid) if cid else {}
 
     def execute(
-        self, query: str, cid: Optional[str] = None, sequence_cid: Optional[str] = None
+        self,
+        query: str,
+        cid: Optional[str] = None,
+        sequence_cid: Optional[str] = None,
+        generate_proof: bool = False,
     ):
         query = query.strip()
         self.cid = cid or self.cid
@@ -38,7 +45,14 @@ class SimpleSQLDatabase:
             storage_data = self.storage.create_table(table_name, self.tables)
             self.cid = storage_data.get("data_cid", None)
             self.sequence_cid = storage_data.get("sequence_cid", None)
-            # self.storage.save(self.tables, table_name)
+            rows = self.tables[table_name]["rows"]
+            circuit, proof = generate_proof_of_membership(
+                self.tables[table_name], [], []
+            )
+            if generate_proof:
+                return rows, circuit, proof
+            return rows
+
         elif query.startswith("INSERT INTO"):
             start = time.time()
             table_name, _, _ = self._process_insert_into(query)
@@ -51,15 +65,24 @@ class SimpleSQLDatabase:
             print(f"Saved updated data on IPFS in {time.time() - start} seconds")
             self.cid = storage_data.get("data_cid", None)
             self.sequence_cid = storage_data.get("sequence_cid", None)
+            rows = new_table_chunk[table_name]["rows"]
+            circuit, proof = generate_proof_of_membership(
+                self.tables[table_name], new_table_chunk[table_name], []
+            )
+            if generate_proof:
+                return rows, circuit, proof
+            return rows
         elif query.startswith("SELECT"):
             table_name = self.parse_select_query(query)[1]
             self.tables = self.storage.load(table_name) or {}
-            print('self tables', self.tables)
             result = self._select(query)
+            query_columns = self.selected_columns if self.selected_columns else []
+            circuit, proof = generate_proof_of_membership(
+                self.tables[table_name], {"rows": result}, query_columns
+            )
+            if generate_proof:
+                return result, circuit, proof
             return result
-
-        elif query.startswith("CREATE INDEX"):
-            self._create_index(query)
         else:
             raise ValueError("Unsupported SQL command")
 
@@ -89,12 +112,14 @@ class SimpleSQLDatabase:
             "indexes": {},
         }
         return table_name
+
     def _process_insert_into(self, query: str):
         match = re.match(r"INSERT INTO (\w+) \((.+)\) VALUES (.+)", query, re.DOTALL)
         if not match:
             raise ValueError("Invalid INSERT INTO syntax")
         table_name, columns, values = match.groups()
         return table_name, columns, values
+
     def _insert_into(self, query: str):
         table_name, columns, values = self._process_insert_into(query)
         columns = [col.strip() for col in columns.split(",")]
@@ -112,8 +137,12 @@ class SimpleSQLDatabase:
             ]
             # Validate and convert values based on column types
             converted_values = []
-            for col, val in zip(columns, values):
-                col_type = new_table_chunk[table_name]["column_types"][col]
+            for col_idx, (col, val) in enumerate(zip(columns, values)):
+                col_type = new_table_chunk[table_name]["column_types"].get(col, None)
+                if not col_type:
+                    raise ValueError(
+                        f"Column {col} does not exist in table {table_name}"
+                    )
                 if col_type == "int":
                     converted_values.append(int(val))
                 elif col_type == "float":
@@ -121,6 +150,9 @@ class SimpleSQLDatabase:
                 elif col_type == "bool":
                     converted_values.append(val.lower() in ["true", "1"])
                 elif col_type == "string":
+                    if col == columns[-1]:
+                        if len(values) > len(columns):
+                            val = ",".join(values[col_idx:])
                     converted_values.append(val.strip("'"))
                 elif col_type == "datetime":
                     converted_values.append(datetime.datetime.fromisoformat(val))
@@ -199,7 +231,7 @@ class SimpleSQLDatabase:
             if vector_column not in columns:
                 columns.append(vector_column)
                 column_indices.append(table["columns"].index(vector_column))
-
+        self.selected_columns = columns
         # Parse WHERE clause if present
         where_condition = None
         if where_clause:
@@ -209,14 +241,16 @@ class SimpleSQLDatabase:
             else:
                 where_match = re.match(r"(\w+) = '(.+)'", where_clause)
             if not where_match:
-                raise ValueError("Invalid WHERE syntax")
+                raise ValueError(
+                    "Invalid WHERE syntax: Only equality assertions are supported"
+                )
             where_column, where_value = where_match.groups()
             if where_column not in table["columns"]:
                 raise ValueError(
                     f"Column {where_column} does not exist in table {table_name}"
                 )
             where_condition = (where_column, where_value)
-
+        self.where_condition = where_condition
         column_indices = [table["columns"].index(col) for col in columns]
         result = []
 
@@ -289,4 +323,5 @@ class SimpleSQLDatabase:
             result = [row for row, _ in similarities]
         if limit_clause:
             result = result[: int(limit_clause)]
+
         return result

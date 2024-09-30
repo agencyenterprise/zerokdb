@@ -22,10 +22,12 @@ tenacity = ">=8.1.0,<9"
 pydantic-settings = "^2.5.2"
 uvicorn = "^0.30.6"
 aptos-sdk = "^0.9.1"
+zerok = {git = "git@github.com:agencyenterprise/0k"}
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
+graphviz = "^0.20.3"
 
 [build-system]
 requires = ["poetry-core"]

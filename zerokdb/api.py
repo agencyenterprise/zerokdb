@@ -3,7 +3,7 @@ from zerokdb.simple_sql_db import SimpleSQLDatabase
 from zerokdb.file_storage import FileStorage
 from zerokdb.enhanced_file_storage import EnhancedFileStorage
 from zerokdb.text_to_embedding import TextToEmbedding
-from typing import Optional
+from typing import Optional, List
 
 
 class DatabaseAPI:
@@ -29,11 +29,12 @@ class DatabaseAPI:
         columns,
         cid: Optional[str] = None,
         sequence_cid: Optional[str] = None,
+        proof: bool = False,
     ):
         """Create a new table."""
         columns_str = ", ".join([f"{name} {dtype}" for name, dtype in columns.items()])
         query = f"CREATE TABLE {table_name} ({columns_str})"
-        self.db.execute(query, cid=cid, sequence_cid=sequence_cid)
+        self.db.execute(query, cid=cid, sequence_cid=sequence_cid, generate_proof=proof)
 
     def insert_into(
         self,
@@ -51,11 +52,17 @@ class DatabaseAPI:
         self.db.execute(query, cid=cid, sequence_cid=sequence_cid)
 
     def execute_query(
-        self, query, cid: Optional[str] = None, sequence_cid: Optional[str] = None
+        self,
+        query,
+        cid: Optional[str] = None,
+        sequence_cid: Optional[str] = None,
+        proof: bool = False,
     ):
         """Execute a SQL query."""
-        return self.db.execute(query, cid=cid, sequence_cid=sequence_cid)
+        return self.db.execute(
+            query, cid=cid, sequence_cid=sequence_cid, generate_proof=proof
+        )
 
-    def convert_text_to_embedding(self, text):
+    def convert_text_to_embedding(self, text) -> List[float]:
         """Convert text to embedding."""
         return self.text_to_embedding.convert(text)
