@@ -3590,11 +3590,11 @@ sympy = "^1.13.2"
 
 [package.source]
 type = "git"
-url = "git@github.com:agencyenterprise/0k"
+url = "https://github.com/agencyenterprise/0k.git"
 reference = "HEAD"
 resolved_reference = "a60ad10c4eac70a05c34e57ea70e1817319ee4ce"
 
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.4"
-content-hash = "e7fd450ba5bd5f39f21863054df49de64aea84d0c772f79b7ddfa9d44aa79190"
+content-hash = "6ed75111f8e550be821ade5248d7e6538c37ba716d29501df667a0a323feaf1a"
