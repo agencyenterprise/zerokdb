@@ -20,7 +20,6 @@ class EnhancedFileStorage:
         """
         url = f"{settings.api_host}/sequence/name"
         response = requests.post(url, json={"entity_name": table_name})
-        print(response.text)
         if response.status_code == 200:
             return response.json()
         else:

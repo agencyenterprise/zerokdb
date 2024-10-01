@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     from_address: str
     private_key: str
     api_host: str
+    aptos_table_sequence_contract: str
+    aptos_private_key: str
 
     class Config:
         extra = "allow"

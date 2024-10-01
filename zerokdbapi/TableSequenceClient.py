@@ -28,7 +28,7 @@ class TableSequenceClient(RestClient):
         signed_transaction = await self.create_bcs_signed_transaction(
             sender, TransactionPayload(payload)
         )
-        return await self.submit_bcs_transaction(signed_transaction)
+        return await self.submit_and_wait_for_bcs_transaction(signed_transaction)
 
     async def create_sequence(self, sender: Account, table_name: str, cid: str) -> str:
         """Create a new sequence"""
@@ -44,7 +44,7 @@ class TableSequenceClient(RestClient):
         signed_transaction = await self.create_bcs_signed_transaction(
             sender, TransactionPayload(payload)
         )
-        return await self.submit_bcs_transaction(signed_transaction)
+        return await self.submit_and_wait_for_bcs_transaction(signed_transaction)
 
     async def update_sequence_cid(self, sender: Account, id: int, new_cid: str) -> str:
         """Update the CID of an existing sequence"""
@@ -60,7 +60,7 @@ class TableSequenceClient(RestClient):
         signed_transaction = await self.create_bcs_signed_transaction(
             sender, TransactionPayload(payload)
         )
-        return await self.submit_bcs_transaction(signed_transaction)
+        return await self.submit_and_wait_for_bcs_transaction(signed_transaction)
 
     async def get_sequence_by_table_name(self, address: str, table_name: str) -> Tuple[int, str, str]:
         """Get a sequence by its table name"""

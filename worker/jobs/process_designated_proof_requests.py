@@ -18,8 +18,6 @@ def process_designated_proof_requests(signature_message_id: bytes, signature: st
             },
         )
 
-        print("test0", proof_request)
-
         if not proof_request:
             print("No proof request to process.")
             return
