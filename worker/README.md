@@ -4,8 +4,11 @@
 
 - [Python Version](#python-version)
 - [Installation](#installation)
-- [Virtual Environment](#virtual-environment)
-- [Installing Packages](#installing-packages)
+  - [Clone the Repository](#clone-the-repository)
+  - [Create a Virtual Environment](#create-a-virtual-environment)
+  - [Install Dependencies](#install-dependencies)
+  - [Environment Variables](#environment-variables)
+  - [Modifying Streamlit Library](#modifying-streamlit-library)
 - [Running the Application](#running-the-application)
 - [Building the Executable](#building-the-executable)
 
@@ -19,82 +22,73 @@ python --version
 
 ## Installation
 
-1. **Clone the repository:**
+1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/agencyenterprise/0k-platform.git
-   cd 0k-platform/worker
+   git clone https://github.com/agencyenterprise/zerokdb.git
+   cd zerokdb/worker
    ```
 
-1. **Install Poetry:**
+1. **Create a Virtual Environment**
 
-   Poetry is a dependency management tool for Python. Install it by following the instructions [here](https://python-poetry.org/docs/#installation).
+   it's advisible to have a venv only for the worker to run adn build it run:
 
    ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   python3.12 -m venv venv
    ```
 
-   Or use `pip`:
+   and:
 
    ```bash
-   pip install poetry
+   source venv/bin/activate # On Windows use `venv\Scripts\activate`
    ```
 
-## Virtual Environment
+   This will create and activate the virtual environment. If you want to deactivate it later, just run `deactivate`.
 
-Poetry automatically creates and manages virtual environments. To create a virtual environment, simply run:
+1. **Install Dependencies**
 
-```bash
-poetry shell
-```
+   Poetry automatically creates and manages virtual environments. To create a virtual environment, simply run:
 
-This will create and activate the virtual environment. If you want to deactivate it later, just run `exit`.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Installing Packages
+   This will create and activate the virtual environment. If you want to deactivate it later, just run `deactivate`.
 
-To install the dependencies specified in your pyproject.toml file, run:
+1. **Environment Variables**
+   Create a `.env` file from `.env.example`
 
-```bash
-poetry install
-```
+   ```bash
+   HUB_URL=http://localhost:8000
+   ```
+
+1. **Modifying Streamlit Library**
+
+   Unfortunatelly for building a python executable with Streamlit we need to alter some code in the lib itself, copy this code:
+
+   ```bash
+   def _main_run_clExplicit(file, is_hello=False, args=[], flag_options={}):
+      bootstrap.run(file, is_hello, args, flag_options)
+   ```
+
+   And past it on the `cli.py` file anywhere before the main function on it, this file is located at `venv/lib/python3.12/site-packages/streamlit/web/cli.py`
 
 ## Running the Application
 
 ```bash
-python run_main.app
+python run_main.py
 ```
 
 ## Building the Executable
 
-1. **Setting up pyenv:**
-
-```
-cd worker
-python3 -m venv venv
-source venv/bin/activate # On Windows use `venv\Scripts\activate`
-```
-
-1. **Install deps for build:**
-
-```
-pip install -r requirements.txt
-```
-
-1. **Env variables:**
-   Create a `.env` file from `.env.example`
-
-```
-HUB_URL=http://localhost:8000
-```
-
 1. **Building and packaging solution:**
 
-```
-pyinstaller run_main.spec
-```
+   ```bash
+   pyinstaller run_main.spec
+   ```
 
 1. **Running executable:**
 
-```
-./dist/run_main
-```
+   ```bash
+   ./dist/run_main
+   ```

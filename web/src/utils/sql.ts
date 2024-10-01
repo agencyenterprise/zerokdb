@@ -119,6 +119,82 @@ const validateSelect = (sql: string) => {
   return true;
 };
 
+const splitValues = (valuesStr: string): string[] => {
+  const values: string[] = [];
+  let current = "";
+  let inArray = false;
+  let inString = false;
+
+  for (let char of valuesStr) {
+    if (char === "'" && !inArray) {
+      inString = !inString;
+      current += char;
+      continue;
+    }
+
+    if (char === "[" && !inString) {
+      inArray = true;
+      current += char;
+      continue;
+    }
+
+    if (char === "]" && !inString) {
+      inArray = false;
+      current += char;
+      continue;
+    }
+
+    if (char === "," && !inArray && !inString) {
+      values.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (current.length > 0) {
+    values.push(current.trim());
+  }
+
+  return values;
+};
+
+/**
+ * Validates individual value formats.
+ *
+ * @param {string} value - The value to validate.
+ * @returns {boolean} - True if valid, else false.
+ */
+const isValidValue = (value: string): boolean => {
+  // Valid number
+  if (/^\d+(\.\d+)?$/.test(value)) {
+    return true;
+  }
+
+  // Valid string
+  if (/^'.*'$/.test(value)) {
+    return true;
+  }
+
+  // Valid array (e.g., [0.1, 0.2, 0.3])
+  if (/^\[.*\]$/.test(value)) {
+    // Further validate the array contents
+    const arrayContent = value.slice(1, -1).trim();
+    if (arrayContent.length === 0) return false; // Empty array is not allowed
+
+    const elements = splitValues(arrayContent);
+    for (let elem of elements) {
+      if (!/^\d+(\.\d+)?$/.test(elem)) {
+        return false; // Array elements must be numbers
+      }
+    }
+    return true;
+  }
+
+  return false; // Invalid value format
+};
+
 /**
  * Validates an INSERT statement.
  *
@@ -127,23 +203,97 @@ const validateSelect = (sql: string) => {
  * @param {string} sql - The cleaned SQL INSERT statement.
  * @returns {boolean} - True if valid, else false.
  */
-const validateInsert = (sql: string) => {
-  // Regular expression to capture table name, columns, and values
-  const insertRegex =
-    /^INSERT INTO\s+[\w]+\s*\(([^)]+)\)\s+VALUES\s*\(([^)]+)\);?$/i;
+const validateInsert = (sql: string): boolean => {
+  // Regular expression to capture table name, columns, and values part
+  const insertRegex = /^INSERT INTO\s+(\w+)\s*\(([^)]+)\)\s+VALUES\s+(.+);?$/i;
   const match = sql.match(insertRegex);
   if (!match) {
     return false; // Invalid INSERT statement format
   }
 
-  const columns = match[1].split(",").map((col) => col.trim());
-  const values = match[2].split(",").map((val) => val.trim());
+  const table = match[1].trim();
+  const columns = match[2].split(",").map((col) => col.trim());
+  const valuesPart = match[3].trim();
 
-  if (columns.length !== values.length) {
-    return false; // Number of columns does not match number of values
+  // Split the valuesPart into multiple value groups if present
+  const valueGroups: string[] = [];
+  let currentGroup = "";
+  let inBrackets = 0;
+  let inQuotes = false;
+  let quoteChar = "";
+
+  for (let i = 0; i < valuesPart.length; i++) {
+    const char = valuesPart[i];
+
+    if (inQuotes) {
+      if (char === quoteChar) {
+        inQuotes = false;
+      }
+      currentGroup += char;
+    } else if (char === '"' || char === "'") {
+      inQuotes = true;
+      quoteChar = char;
+      currentGroup += char;
+    } else if (char === "(") {
+      inBrackets++;
+      currentGroup += char;
+    } else if (char === ")") {
+      inBrackets--;
+      currentGroup += char;
+      if (inBrackets === 0) {
+        valueGroups.push(currentGroup.trim());
+        currentGroup = "";
+      }
+    } else {
+      currentGroup += char;
+    }
   }
 
-  // Optionally, you can add more validations for column names and value formats
+  if (currentGroup.length > 0) {
+    // There might be missing closing parentheses
+    return false;
+  }
+
+  // Now, validate each value group
+  for (let group of valueGroups) {
+    // Remove the surrounding parentheses
+    if (!group.startsWith("(") || !group.endsWith(")")) {
+      return false;
+    }
+    const inner = group.slice(1, -1).trim();
+    // Split the inner values considering arrays and quoted strings
+    const values = splitValues(inner);
+    if (columns.length !== values.length) {
+      return false; // Number of columns does not match number of values
+    }
+
+    // Validate each value
+    for (let value of values) {
+      if (value.startsWith("[") && value.endsWith("]")) {
+        // It's an array
+        try {
+          // Replace single quotes with double quotes for JSON.parse compatibility
+          const jsonArray = value.replace(/'/g, '"');
+          const parsedArray = JSON.parse(jsonArray);
+          if (!Array.isArray(parsedArray)) {
+            return false;
+          }
+          // Ensure all elements are numbers
+          if (!parsedArray.every((item) => typeof item === "number")) {
+            return false;
+          }
+        } catch (e) {
+          return false; // Invalid array format
+        }
+      } else if (value.startsWith("'") && value.endsWith("'")) {
+        // It's a string, ensure it's properly quoted
+        // Additional string validations can be added here if necessary
+      } else if (!/^-?\d+(\.\d+)?$/.test(value)) {
+        // It's neither an array nor a properly quoted string nor a number
+        return false;
+      }
+    }
+  }
 
   return true;
 };
@@ -156,28 +306,64 @@ const validateInsert = (sql: string) => {
  * @param {string} sql - The cleaned SQL CREATE TABLE statement.
  * @returns {boolean} - True if valid, else false.
  */
-const validateCreateTable = (sql: string) => {
+const validateCreateTable = (sql: string): boolean => {
   // Regular expression to capture table name and columns
-  const createTableRegex = /^CREATE TABLE\s+[\w]+\s*\(([^)]+)\);?$/i;
+  const createTableRegex = /^CREATE TABLE\s+(\w+)\s*\(([^)]+)\);?$/i;
   const match = sql.match(createTableRegex);
   if (!match) {
     return false; // Invalid CREATE TABLE statement format
   }
 
-  const columnsPart = match[1];
+  const table = match[1].trim();
+  const columnsPart = match[2].trim();
+
+  // 1. Ensure table name is valid
+  if (!table || !/^\w+$/i.test(table)) return false;
+
+  // 2. Split column definitions by comma
   const columns = columnsPart.split(",").map((col) => col.trim());
 
   if (columns.length === 0) {
     return false; // No columns defined
   }
 
-  // Validate each column has a name and type
+  // 3. Define allowed base data types and complex types
+  const allowedBaseTypes = ["INT", "STRING", "FLOAT"];
+
+  const allowedComplexTypes = ["LIST"];
+
+  // 4. Validate each column definition
   for (let column of columns) {
-    // A simple regex to check for "name type"
-    if (!/^[\w]+[\s]+[\w]+$/i.test(column)) {
+    // Regular expression to capture column name and type
+    // Supports complex types like list[float]
+    const columnRegex = /^(\w+)\s+([\w]+(?:\s*\[\s*\w+\s*\])?)$/i;
+    const colMatch = column.match(columnRegex);
+    if (!colMatch) {
       return false; // Column definition is invalid
     }
-    // Optionally, validate the data type against a list of allowed types
+
+    const colName = colMatch[1].trim();
+    const colType = colMatch[2].trim().toUpperCase();
+
+    // Ensure column name is valid
+    if (!/^\w+$/i.test(colName)) return false;
+
+    // Check if type is a base type
+    if (allowedBaseTypes.includes(colType)) {
+      continue;
+    }
+
+    // Check for complex types like LIST[FLOAT]
+    const complexTypeMatch = colType.match(/^(\w+)\s*\[\s*(\w+)\s*\]$/);
+    if (complexTypeMatch) {
+      const baseType = complexTypeMatch[1].trim();
+      const innerType = complexTypeMatch[2].trim();
+
+      if (!allowedComplexTypes.includes(baseType)) return false;
+      if (!allowedBaseTypes.includes(innerType)) return false;
+    } else {
+      return false; // Type is neither a base type nor a supported complex type
+    }
   }
 
   return true;

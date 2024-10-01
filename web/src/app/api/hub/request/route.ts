@@ -23,8 +23,14 @@ export async function POST(req: Request) {
     const backendAuthToken = process.env.HUB_AUTH_TOKEN || "";
 
     const ai_model_inputs = data.semantic?.length
-      ? { type: "TEXT", value: data.semantic }
-      : { type: "SQL", value: data?.sql?.split(/\s+/)?.join(" ")?.trim() };
+      ? {
+          type: "TEXT",
+          value: { text: data.semantic, table_name: data?.table },
+        }
+      : {
+          type: "SQL",
+          value: data?.sql?.split(/\s+/)?.join(" ")?.trim(),
+        };
 
     const response = await fetch(`${backendUrl}/proof_requests`, {
       method: "POST",
@@ -35,8 +41,12 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         chain: "aptos_testnet",
         owner_wallet: ownerWallet,
-        name: ai_model_inputs.value.substring(0, 30),
-        description: ai_model_inputs.value,
+        name: data.semantic?.length
+          ? ai_model_inputs?.value?.text?.substring(0, 30)
+          : ai_model_inputs?.value?.substring(0, 30),
+        description: data.semantic?.length
+          ? ai_model_inputs?.value?.text
+          : ai_model_inputs?.value,
         ai_model_name: "zerokdb",
         ai_model_inputs: JSON.stringify(ai_model_inputs),
       }),

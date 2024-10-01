@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     api_host: str
 
     class Config:
+        extra = "allow"
         env_file = find_dotenv()
 
 

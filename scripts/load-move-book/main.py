@@ -4,7 +4,7 @@ import requests
 import PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-api_url = os.getenv("ZORKDB_API_URL", "http://localhost:8000")
+api_url = os.getenv("ZORKDB_API_URL", "http://localhost:8001")
 
 # Step 1: Extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     table_name = f"move_book"
 
     try:
-        process_pdf_to_zerokdb(pdf_path, table_name, create_table=False)
+        process_pdf_to_zerokdb(pdf_path, table_name, create_table=True)
         print(f"Data from {pdf_path} has been successfully stored in table {table_name}")
     except Exception as e:
         print(f"An error occurred: {e}")
