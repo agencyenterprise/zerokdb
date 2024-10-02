@@ -6,7 +6,7 @@ authors = ["AE Studio <lorenzo.tomaz@ae.studio>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
+python = "3.12.4"
 web3 = "7.2.0"
 ipfshttpclient = "^0.7.0"
 numpy = "1.26.0"
@@ -22,7 +22,7 @@ tenacity = ">=8.1.0,<9"
 pydantic-settings = "^2.5.2"
 uvicorn = "^0.30.6"
 aptos-sdk = "^0.9.1"
-zerok = {git = "git@github.com:agencyenterprise/0k"}
+zerok = {git = "https://github.com/agencyenterprise/0k.git"}
 
 
 [tool.poetry.group.dev.dependencies]
