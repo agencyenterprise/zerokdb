@@ -12,11 +12,13 @@ class DatabaseAPI:
         storage_type="file",
         storage_location="database.json",
         database_name="database",
+        api_host="http://localhost:8001",
+        pinata_api_key="test",
     ):
         if storage_type == "file":
             self.storage = FileStorage(storage_location)
         elif storage_type == "ipfs":
-            self.storage = EnhancedFileStorage(database_name)
+            self.storage = EnhancedFileStorage(database_name, api_host=api_host, pinata_api_key=pinata_api_key)
         else:
             raise ValueError("Unsupported storage type")
         self.change_tracker = ChangeTracker()

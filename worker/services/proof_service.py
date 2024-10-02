@@ -1,16 +1,16 @@
+import os
 from zerokdb.api import DatabaseAPI
 import json
 
-
 async def generate_proof(
-    proof_request_id: str, ai_model_name: str, ai_model_inputs: str
+    proof_request_id: str, ai_model_name: str, ai_model_inputs: str, pina_api_key: str
 ):
     print("Generating proof for request " + proof_request_id)
     result = None
 
     if ai_model_name != "zerokdb":
         return None, None
-    db_api = DatabaseAPI(storage_type="ipfs")
+    db_api = DatabaseAPI(storage_type="ipfs", pinata_api_key=pina_api_key, api_host=os.getenv("API_HOST") or "http://localhost:8001")
     ai_model_inputs_dict = json.loads(ai_model_inputs)
 
     if ai_model_inputs_dict["type"] == "TEXT":
