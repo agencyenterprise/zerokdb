@@ -21,6 +21,7 @@ schedule = "^1.2.2"
 streamlit = "^1.38.0"
 zerokdb = {git = "git@github.com:agencyenterprise/zerokdb.git"}
 zerok = {git = "git@github.com:agencyenterprise/0k"}
+pyinstaller = "^6.10.0"
 
 [build-system]
 requires = ["poetry-core"]

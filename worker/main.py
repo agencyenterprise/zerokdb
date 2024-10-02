@@ -106,6 +106,7 @@ def main():
         st.markdown('<div style="padding: 0px 0px 10px 0px">Start the worker to start earning rewards for verifying proofs.</div>', unsafe_allow_html=True)
 
         wallet_address = st.text_input("Enter your APTOS wallet address")
+        pinata_api_key = st.text_input("Enter your Pinata API Key", type='password')
         st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
 
         # Button Area
@@ -114,13 +115,14 @@ def main():
         if not st.session_state.worker_running:
             # Start Worker Button
             if button_area.button("Start Worker"):
-                if wallet_address:
+                if wallet_address and pinata_api_key:
                     os.environ['WORKER_WALLET'] = wallet_address
+                    os.environ['PINATA_API_KEY'] = pinata_api_key
                     st.session_state.worker_running = True
                     print(f"Using wallet address: {wallet_address}")
                     start_worker()
                 else:
-                    print("Please enter a valid wallet address!!!")
+                    print("Please enter a valid wallet address and Pinata API Key!!!")
         else:
             # Stop Worker Button
             if button_area.button("Stop Worker"):
