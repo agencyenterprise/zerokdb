@@ -28,7 +28,7 @@ class StreamlitLogger:
     def flush(self):
         pass  # No need to implement flush for our use case
 
-def start_worker():
+def start_worker(pina_api_key, wallet):
     """Start the worker and scheduling."""
     global auth_public_key, auth_private_key
     print("Starting worker...")
@@ -42,12 +42,12 @@ def start_worker():
 
     # Register worker
     print('Worker registration initiated...', flush=True)
-    signature_message_id, worker_id, signature = register(auth_public_key, auth_private_key)
+    signature_message_id, worker_id, signature = register(auth_public_key, auth_private_key, wallet)
     print(f'Worker {worker_id} registered successfully.', flush=True)
 
     # Schedule jobs
     print("Starting jobs...", flush=True)
-    schedule.every(5).seconds.do(process_designated_proof_requests, signature_message_id, signature)
+    schedule.every(5).seconds.do(process_designated_proof_requests, signature_message_id, signature, pina_api_key, api_host)
 
 def stop_worker():
     """Stop the worker and clear the scheduled jobs."""
@@ -116,11 +116,9 @@ def main():
             # Start Worker Button
             if button_area.button("Start Worker"):
                 if wallet_address and pinata_api_key:
-                    os.environ['WORKER_WALLET'] = wallet_address
-                    os.environ['PINATA_API_KEY'] = pinata_api_key
                     st.session_state.worker_running = True
                     print(f"Using wallet address: {wallet_address}")
-                    start_worker()
+                    start_worker(pinata_api_key, wallet_address)
                 else:
                     print("Please enter a valid wallet address and Pinata API Key!!!")
         else:

@@ -4,7 +4,7 @@ import os
 from services.hub_service import call_hub_post
 from services.signature_service import sign_message
 
-def register(public_key: bytes, private_key: bytes):
+def register(public_key: bytes, private_key: bytes, wallet: str):
   try:
     message_data = {
       'public_key': base64.urlsafe_b64encode(public_key).decode()
@@ -15,7 +15,7 @@ def register(public_key: bytes, private_key: bytes):
 
     worker_data = {
       'wallets': [{
-        'wallet': os.getenv("WORKER_WALLET"),
+        'wallet': wallet,
         'chain': 'aptos_testnet'
       }],
       'ai_models': ['zerokdb']

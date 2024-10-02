@@ -1,12 +1,13 @@
 import requests
-from zerokdb.config import settings
 from zerokdb.ipfs_storage import IPFSStorage
 from typing import Dict, Any
 
 
 class EnhancedFileStorage:
-    def __init__(self, filename):
+    def __init__(self, filename, api_host, pinata_api_key):
         self.filename = filename
+        self.api_host = api_host
+        self.pinata_api_key = pinata_api_key
 
     def save(self, data, table_name):
         """
@@ -18,7 +19,7 @@ class EnhancedFileStorage:
         """
         Get the CID sequence by querying the REST API at zerokdbapi.
         """
-        url = f"{settings.api_host}/sequence/name"
+        url = f"{self.api_host}/sequence/name"
         response = requests.post(url, json={"entity_name": table_name})
         if response.status_code == 200:
             return response.json()
@@ -29,7 +30,7 @@ class EnhancedFileStorage:
         """
         Call the POST /entity endpoint to create a new table.
         """
-        url = f"{settings.api_host}/entity"
+        url = f"{self.api_host}/entity"
         response = requests.post(url, json={"entity_name": entity_name, "data": data})
         if response.status_code == 200:
             return response.json()
@@ -40,7 +41,7 @@ class EnhancedFileStorage:
         """
         Load data by querying the Pinata API using a CID.
         """
-        storage = IPFSStorage()
+        storage = IPFSStorage(pinata_api_key=self.pinata_api_key)
         return storage.download_db(cid)
 
     def load(self, table_name: str) -> Dict[str, Any]:
@@ -49,7 +50,7 @@ class EnhancedFileStorage:
         """
         try:
             print(f"Loading data for table {table_name}")
-            storage = IPFSStorage()
+            storage = IPFSStorage(pinata_api_key=self.pinata_api_key)
             sequence = self.get_table_sequence_by_name(table_name)
             cid = sequence["sequence_cid"]
             return storage.download_db(cid)
@@ -61,7 +62,7 @@ class EnhancedFileStorage:
         """
         Call the REST API at zerokdbapi to append data.
         """
-        url = f"{settings.api_host}/append-data"
+        url = f"{self.api_host}/append-data"
         response = requests.post(url, json={"data": data, "table_name": table_name})
         if response.status_code == 200:
             return response.json()

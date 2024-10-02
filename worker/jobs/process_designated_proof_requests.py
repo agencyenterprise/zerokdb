@@ -6,7 +6,7 @@ import base64
 import dill
 
 
-def process_designated_proof_requests(signature_message_id: bytes, signature: str):
+def process_designated_proof_requests(signature_message_id: bytes, signature: str, pinata_api_key: str):
     print("Fetching designated proof requests...")
 
     try:
@@ -38,6 +38,7 @@ def process_designated_proof_requests(signature_message_id: bytes, signature: st
                 proof_request["id"],
                 proof_request["ai_model_name"],
                 proof_request["ai_model_inputs"],
+                pinata_api_key,
             )
         )
         b64_circuit = base64.b64encode(dill.dumps(circuit)).decode()

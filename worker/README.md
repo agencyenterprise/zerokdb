@@ -50,7 +50,7 @@ python --version
    Poetry automatically creates and manages virtual environments. To create a virtual environment, simply run:
 
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
 
    This will create and activate the virtual environment. If you want to deactivate it later, just run `deactivate`.

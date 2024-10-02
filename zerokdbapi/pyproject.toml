@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "zerokdbapi"
+version = "0.1.0"
+description = ""
+authors = ["AE Studio <lorenzo.tomaz@ae.studio>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.4"
+web3 = "7.2.0"
+ipfshttpclient = "^0.7.0"
+numpy = "1.26.0"
+torch = "2.2.0"
+transformers = "^4.44.2"
+click = "^8.1.7"
+fastapi = "^0.114.2"
+pydantic = "^2.9.1"
+sqlalchemy = "^2.0.34"
+psycopg2 = "^2.9.9"
+python-dotenv = "^1.0.1"
+tenacity = ">=8.1.0,<9"
+pydantic-settings = "^2.5.2"
+uvicorn = "^0.30.6"
+aptos-sdk = "^0.9.1"
+zerok = {git = "https://github.com/agencyenterprise/0k.git"}
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+graphviz = "^0.20.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]

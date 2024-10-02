@@ -6,21 +6,19 @@ authors = ["kevinkons <kevin.kons@hotmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
+python = "3.12.4"
 fastapi = "^0.114.2"
 uvicorn = "^0.30.6"
 python-dotenv = "^1.0.1"
 pydantic = "^2.8.2"
 aio-pika = "^9.4.3"
-zkgraph = {git = "git@github.com:agencyenterprise/zkgraph-bnb-hack.git"}
 onnx = "^1.16.2"
 dill = "^0.3.8"
 httpx = "^0.27.2"
 pycryptodome = "^3.20.0"
 schedule = "^1.2.2"
 streamlit = "^1.38.0"
-zerokdb = {git = "git@github.com:agencyenterprise/zerokdb.git"}
-zerok = {git = "git@github.com:agencyenterprise/0k"}
+zerokdb = {git = "git@github.com:agencyenterprise/zerokdb.git"} # zerok is needed but its already a dependency of zerokdb
 pyinstaller = "^6.10.0"
 
 [build-system]

@@ -10,6 +10,7 @@ from zerokdbapi import TableSequenceClient
 from zerokdbapi.api.table_sequence import get_sender, get_table_sequence_client
 from zerokdbapi.controller import add_table_sequence, update_table_sequence_cid
 from zerokdbapi.TextToEmbedding import TextToEmbedding
+from zerokdbapi.config import settings
 
 app = FastAPI()
 
@@ -74,7 +75,7 @@ async def create_entity(
             raise HTTPException(
                 status_code=400, detail="Invalid entity name. Entity already exists."
             )
-        storage = IPFSStorage()
+        storage = IPFSStorage(pinata_api_key=settings.pinata_api_key)
         data_cid, sequence_cid = storage.append_data(EntityPayload.data, "0x0")
         sequence = add_table_sequence(EntityPayload.entity_name, sequence_cid)
         await client.create_sequence(account, EntityPayload.entity_name, sequence_cid)
@@ -104,7 +105,7 @@ async def append_data_by_table_name(
         parsed_result = json.loads(decoded_result)
         id_, _, cid = int(parsed_result[0]), parsed_result[1], parsed_result[2]
 
-        storage = IPFSStorage()
+        storage = IPFSStorage(pinata_api_key=settings.pinata_api_key)
         data_cid, cid_sequence = storage.append_data(payload.data, cid)
         update_table_sequence_cid(id_, cid_sequence)
         await client.update_sequence_cid(account, id_, cid_sequence)
@@ -113,6 +114,7 @@ async def append_data_by_table_name(
     except HTTPException:
         raise
     except Exception as e:
+        print('Error while appending data: ', e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

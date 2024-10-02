@@ -2,7 +2,6 @@ import json
 from typing import Optional, Dict, Any, TypedDict, Union, List, Literal
 import hashlib
 import requests
-from zerokdb.config import settings
 from tenacity import retry, wait_exponential
 import time
 
@@ -23,7 +22,8 @@ class CIDSequence(TypedDict):
 
 
 class IPFSStorage:
-    def __init__(self):
+    def __init__(self, pinata_api_key):
+        self.pinata_api_key = pinata_api_key
         self.cid: Optional[str] = None  # This will hold the latest data chunk CID
 
     def save(self, data: Dict[str, TableData]) -> str:
@@ -32,7 +32,7 @@ class IPFSStorage:
         """
         url = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
         headers = {
-            "Authorization": f"Bearer {settings.pinata_api_key}",
+            "Authorization": f"Bearer {self.pinata_api_key}",
             "Content-Type": "application/json",
         }
         payload = {
@@ -52,7 +52,7 @@ class IPFSStorage:
         """
         url = f"https://gateway.pinata.cloud/ipfs/{cid}"
         headers = {
-            "Authorization": f"Bearer {settings.pinata_api_key}",
+            "Authorization": f"Bearer {self.pinata_api_key}",
             "Content-Type": "application/json",
         }
         response = requests.get(url, headers=headers)
