@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from aptos_sdk.account import Account
 from typing import Tuple
 
-from zerokdbapi.TableSequenceClient import TableSequenceClient
+from TableSequenceClient import TableSequenceClient
 
 router = APIRouter()
 

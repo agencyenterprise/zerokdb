@@ -1,5 +1,5 @@
 from sqlalchemy.exc import SQLAlchemyError
-from zerokdbapi.db import TableSequences, session
+from db import TableSequences, session
 from typing import Optional
 
 

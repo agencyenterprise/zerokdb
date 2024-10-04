@@ -6,11 +6,11 @@ from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 
 from zerokdb.ipfs_storage import IPFSStorage
-from zerokdbapi import TableSequenceClient
-from zerokdbapi.api.table_sequence import get_sender, get_table_sequence_client
-from zerokdbapi.controller import add_table_sequence, update_table_sequence_cid
-from zerokdbapi.TextToEmbedding import TextToEmbedding
-from zerokdbapi.config import settings
+import TableSequenceClient
+from api.table_sequence import get_sender, get_table_sequence_client
+from controller import add_table_sequence, update_table_sequence_cid
+from TextToEmbedding import TextToEmbedding
+from config import settings
 
 app = FastAPI()
 
