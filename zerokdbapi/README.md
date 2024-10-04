@@ -84,7 +84,7 @@ To run the tests for this project, follow these steps:
    Start the FastAPI server using Uvicorn:
 
    ```bash
-   uvicorn zerokdbapi.main:app --reload --port 8001
+   uvicorn main:app --reload --port 8001
    ```
 
    Obs.: sometimes you neew to with `python -m` at the begining depending on your venv config
