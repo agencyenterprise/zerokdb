@@ -23,6 +23,7 @@ pydantic-settings = "^2.5.2"
 uvicorn = "^0.30.6"
 aptos-sdk = "^0.9.1"
 zerok = {git = "https://github.com/agencyenterprise/0k.git"}
+zerokdb = {path = "../zerokdb"}
 
 
 [tool.poetry.group.dev.dependencies]
