@@ -1,16 +1,16 @@
 import json
+import os
 from typing import Any, Dict
 
+import TableSequenceClient
 from aptos_sdk.account import Account
+from config import settings
+from controller import add_table_sequence, update_table_sequence_cid
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
+from TextToEmbedding import TextToEmbedding
 
 from zerokdb.ipfs_storage import IPFSStorage
-import TableSequenceClient
-from api.table_sequence import get_sender, get_table_sequence_client
-from controller import add_table_sequence, update_table_sequence_cid
-from TextToEmbedding import TextToEmbedding
-from config import settings
 
 app = FastAPI()
 
@@ -32,6 +32,14 @@ class EmbeddingPayload(BaseModel):
 class EntityNamePayload(BaseModel):
     entity_name: str
 
+
+async def get_table_sequence_client():
+    node_url = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
+    return TableSequenceClient.TableSequenceClient(node_url)
+
+
+async def get_sender():
+    return Account.load_key(os.getenv("APTOS_PRIVATE_KEY"))
 
 @app.post("/sequence/name")
 async def get_cid_sequence_by_table_name(
