@@ -60,6 +60,7 @@ python --version
 
    ```bash
    HUB_URL=http://localhost:8000
+   API_HOST=http://localhost:8001
    ```
 
 1. **Modifying Streamlit Library**
