@@ -5,7 +5,6 @@ from typing import Any, Dict
 import TableSequenceClient
 from aptos_sdk.account import Account
 from config import settings
-from controller import add_table_sequence, update_table_sequence_cid
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from TextToEmbedding import TextToEmbedding
@@ -85,13 +84,10 @@ async def create_entity(
             )
         storage = IPFSStorage(pinata_api_key=settings.pinata_api_key)
         data_cid, sequence_cid = storage.append_data(EntityPayload.data, "0x0")
-        sequence = add_table_sequence(EntityPayload.entity_name, sequence_cid)
         await client.create_sequence(account, EntityPayload.entity_name, sequence_cid)
         return {
-            "id": sequence.id,
-            "table_name": sequence.table_name,
             "data_cid": data_cid,
-            "sequence_cid": sequence.cid,
+            "sequence_cid": sequence_cid,
         }
     except Exception as e:
         print('Error', e)
@@ -115,7 +111,6 @@ async def append_data_by_table_name(
 
         storage = IPFSStorage(pinata_api_key=settings.pinata_api_key)
         data_cid, cid_sequence = storage.append_data(payload.data, cid)
-        update_table_sequence_cid(id_, cid_sequence)
         await client.update_sequence_cid(account, id_, cid_sequence)
 
         return {"data_cid": data_cid, "sequence_cid": cid_sequence}
