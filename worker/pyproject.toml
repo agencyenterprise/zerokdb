@@ -18,8 +18,8 @@ httpx = "^0.27.2"
 pycryptodome = "^3.20.0"
 schedule = "^1.2.2"
 streamlit = "^1.38.0"
-zerokdb = {git = "git@github.com:agencyenterprise/zerokdb.git"} # zerok is needed but its already a dependency of zerokdb
 pyinstaller = "^6.10.0"
+zerokdb = {path = "../zerokdb"}
 
 [build-system]
 requires = ["poetry-core"]
