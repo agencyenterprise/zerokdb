@@ -1,31 +1,44 @@
+# Use an official Python runtime as a parent image
 FROM python:3.12.4-slim as runner
 
+# Set the working directory inside the container
 WORKDIR /app
 
+# Install system dependencies, including libpq-dev for psycopg2
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
     curl \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-COPY pyproject.toml poetry.lock ./
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi
+# Clone the zerokdb repository
+RUN git clone https://github.com/agencyenterprise/zerokdb.git
 
-COPY . .
+# Navigate to the worker directory
+WORKDIR /app/zerokdb/worker
 
-# Modify Streamlit's cli.py
-RUN STREAMLIT_CLI_PATH=$(poetry run python -c "import streamlit; import os; print(os.path.join(os.path.dirname(streamlit.__file__), 'web', 'cli.py'))") && \
-    sed -i '/def _main_run_clExplicit(file, is_hello=False, args=[], flag_options={})/i \
-def _main_run_clExplicit(file, is_hello=False, args=[], flag_options={}):\n    bootstrap.run(file, is_hello, args, flag_options)' $STREAMLIT_CLI_PATH
+# Disable Poetry virtual environments
+RUN poetry config virtualenvs.create false
 
-# Expose port 8502
+# Install Python dependencies using Poetry (without virtualenvs)
+RUN poetry install --no-root --no-interaction --no-ansi
+
+# Modify Streamlit's cli.py (Ensure Streamlit is installed)
+COPY update_streamlit.sh .
+RUN chmod +x update_streamlit.sh && \
+    ./update_streamlit.sh
+
+# Expose port 8502 for the application
 EXPOSE 8502
 
 # Set environment variables (override if needed)
 ENV HUB_URL=http://localhost:8000
+ENV API_HOST=http://localhost:8001
 
-# Run the executable
-CMD ["python run_main.py"]
+# Define the default command to run the application
+CMD ["python", "run_main.py"]

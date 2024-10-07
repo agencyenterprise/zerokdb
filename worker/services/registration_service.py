@@ -29,4 +29,5 @@ def register(public_key: bytes, private_key: bytes, wallet: str):
     return message_response['id'], worker_response['id'], signature
 
   except Exception as e:
+    print('Error registering worker:', e)
     raise Exception('Error registering worker: {}'.format(e))

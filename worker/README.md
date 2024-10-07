@@ -72,7 +72,13 @@ python --version
       bootstrap.run(file, is_hello, args, flag_options)
    ```
 
-   And past it on the `cli.py` file anywhere before the main function on it, this file is located at `venv/lib/python3.12/site-packages/streamlit/web/cli.py`
+   And paste it on the `cli.py` file anywhere before the main function on it, this file is located at `venv/lib/python3.12/site-packages/streamlit/web/cli.py`
+
+   or run
+
+   ```bash
+   sh update_streamlit.sh
+   ```
 
 ## Running the Application
 
@@ -92,4 +98,18 @@ python run_main.py
 
    ```bash
    ./dist/run_main
+   ```
+
+## Building Docker Container
+
+1. **Building:**
+
+   ```bash
+   docker build -t zerokdb-worker .
+   ```
+
+1. **Running Container:**
+
+   ```bash
+   docker run -d -p 8502:8502 --name zerokdb-worker-container zerokdb-worker
    ```
