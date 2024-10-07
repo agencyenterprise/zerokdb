@@ -1,62 +1,58 @@
-from zerokdb.ipfs_storage import TableData
-from datetime import datetime
-from typing import List, Union, Tuple
 import hashlib
-from zerok.commitments.mkzg.ecc import curve_order
-from zerok.circuits.circuit import LayeredCircuit
-from zerok.graph.engine import Value
-from zerok.prover.prover import ZkProver
-from zerok.polynomials.field import SCALE
-import random
-from functools import reduce
 import operator
+import random
+import sys
+from datetime import datetime
+from functools import reduce
+from typing import List, Tuple, Union
 
+from zerok.circuits.circuit import LayeredCircuit
+from zerok.commitments.mkzg.ecc import curve_order
+from zerok.graph.engine import Value
+from zerok.polynomials.field import SCALE
+from zerok.prover.prover import ZkProver
+
+from zerokdb.ipfs_storage import TableData
+
+sys.set_int_max_str_digits(100000)
 
 def prod(iterable):
     return reduce(operator.mul, iterable, 1)
 
 
-def hash_value(value: str):
+def hash_value(value: Union[str, int, float, bool, datetime]) -> int:
     if isinstance(value, str):
         return int(hashlib.sha256(value.encode()).hexdigest(), 16)
-    elif isinstance(value, int) or isinstance(value, float):
+    elif isinstance(value, (int, float)):
         return int(hashlib.sha256(str(value).encode()).hexdigest(), 16)
     elif isinstance(value, bool):
         return int(hashlib.sha256(str(value).encode()).hexdigest(), 16)
     elif isinstance(value, datetime):
         return int(hashlib.sha256(str(value.timestamp()).encode()).hexdigest(), 16)
+    else:
+        raise ValueError(f"Unsupported value type: {type(value)}")
 
 
 def hash_table_column(
-    column_name: str, column_type: str, column_value: str, column_index: str
-):
-    value = 0
-    if column_type == "string":
-        if not isinstance(column_value, str):
-            raise ValueError("Expected string value")
-        value = int(column_value.encode("utf-8").hex(), 16)
-    elif column_type == "int":
-        if not isinstance(column_value, int):
-            raise ValueError("Expected int value")
-        value = column_value
-    elif column_type == "float":
-        if not isinstance(column_value, float):
-            raise ValueError("Expected float value")
-        value = int(round(column_value * 1e8), 0)
-    elif column_type == "bool":
-        if not isinstance(column_value, bool):
-            raise ValueError("Expected bool value")
-        value = int(column_value)
-    elif column_type == "datetime":
-        if not isinstance(column_value, datetime):
-            raise ValueError("Expected datetime value")
-        value = int(column_value.timestamp())
-    elif column_type == "list[float]":
-        if not isinstance(column_value, list):
-            raise ValueError("Expected list value")
-        value = int(hashlib.sha256(str(column_value).encode()).hexdigest(), 16)
-    else:
-        raise ValueError("Unsupported column type")
+    column_name: str, column_type: str, column_value: Union[str, int, float, bool, datetime, List[float]], column_index: int
+) -> int:
+    type_handlers = {
+        "STRING": lambda x: int.from_bytes(x.encode("utf-8"), "big"),
+        "TEXT": lambda x: int.from_bytes(x.encode("utf-8"), "big"),
+        "INT": lambda x: x,
+        "FLOAT": lambda x: int(round(x * 1e8)),
+        "BOOL": int,
+        "DATETIME": lambda x: int(x.timestamp()),
+        "LIST[FLOAT]": lambda x: int.from_bytes(hashlib.sha256(str(x).encode()).digest(), "big")
+    }
+
+    if column_type not in type_handlers:
+        raise ValueError(f"Unsupported column type: {column_type}")
+
+    if not isinstance(column_value, type(column_value).__mro__[0]):
+        raise ValueError(f"Expected {column_type} value, got {type(column_value)}")
+
+    value = type_handlers[column_type](column_value)
     column_id = hash_value(column_name)
     value = hash_value(str(column_id) + str(column_index) + str(value))
     return value % curve_order
@@ -101,6 +97,9 @@ def record_to_polynomial(
     polynomial = []
     for record in records["rows"]:
         for i, (column_name, column_value) in enumerate(zip(columns, record)):
+            if column_name == '*':
+                # Skip the '*' column as it's not a real column
+                continue
             column_type = column_types[column_name]
             value = hash_table_column(column_name, column_type, column_value, i)
             polynomial.append(value)
