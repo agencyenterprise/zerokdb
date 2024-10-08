@@ -1,10 +1,12 @@
-import pytest
-from zerokdb.api import DatabaseAPI
-from zerokdb.simple_sql_db import SimpleSQLDatabase
-from zerok.verifier.verifier import ZkVerifier
-from zerokdb.enhanced_file_storage import EnhancedFileStorage
-import time
 import os
+import time
+
+import pytest
+from zerok.verifier.verifier import ZkVerifier
+
+from zerokdb.api import DatabaseAPI
+from zerokdb.enhanced_file_storage import EnhancedFileStorage
+from zerokdb.simple_sql_db import SimpleSQLDatabase
 
 
 @pytest.fixture
@@ -14,7 +16,18 @@ def db_api_file():
         os.remove("test_db.json")
     except FileNotFoundError:
         pass
-    return DatabaseAPI(storage_type="file", storage_location="test_db.json")
+
+    db_api = DatabaseAPI(storage_type="file", storage_location="test_db.json")
+
+    # Delete all tables in SQLite
+    cursor = db_api.db.conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    for table in tables:
+        cursor.execute(f"DROP TABLE IF EXISTS {table[0]};")
+    db_api.db.conn.commit()
+
+    return db_api
 
 
 @pytest.fixture
@@ -24,58 +37,58 @@ def db_api_ipfs():
 
 def test_create_table(db_api_file: DatabaseAPI):
     table_name = "users"
-    db_api_file.create_table(table_name, {"id": "int", "name": "string"})
+    db_api_file.create_table(table_name, {"id": "INT", "name": "STRING"})
     result = db_api_file.execute_query(f"SELECT * FROM {table_name}")
     assert result == []
 
 
 def test_create_table_ipfs(db_api_ipfs: DatabaseAPI):
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "int", "name": "string"})
+    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
     result = db_api_ipfs.execute_query(f"SELECT * FROM {table_name}")
     assert result == []
 
 
 def test_insert_into(db_api_file: DatabaseAPI):
     table_name = "users"
-    db_api_file.create_table(table_name, {"id": "int", "name": "string"})
+    db_api_file.create_table(table_name, {"id": "INT", "name": "STRING"})
     db_api_file.insert_into(table_name, {"id": 1, "name": "Alice"})
     result = db_api_file.execute_query(f"SELECT * FROM {table_name}")
-    assert result == [[1, "Alice"]]
+    assert result == [(1, "Alice")]
 
 
 def test_insert_into_ipfs(db_api_ipfs: DatabaseAPI):
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "int", "name": "string"})
+    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
     db_api_ipfs.insert_into(table_name, {"id": 1, "name": "Alice"})
     result = db_api_ipfs.execute_query(f"SELECT * FROM {table_name}")
-    assert result == [[1, "Alice"]]
+    assert result == [(1, "Alice")]
 
 
 def test_execute_query(db_api_file: DatabaseAPI):
-    db_api_file.create_table("users", {"id": "int", "name": "string"})
+    db_api_file.create_table("users", {"id": "INT", "name": "STRING"})
     db_api_file.insert_into("users", {"id": 1, "name": "Alice"})
     result = db_api_file.execute_query("SELECT name FROM users WHERE id = 1")
-    assert result == [["Alice"]]
+    assert result == [("Alice",)]
 
 
 def test_execute_query_with_proof(db_api_file: DatabaseAPI):
-    db_api_file.create_table("users", {"id": "int", "name": "string"})
+    db_api_file.create_table("users", {"id": "int", "name": "STRING"})
     db_api_file.insert_into("users", {"id": 1, "name": "Alice"})
     result, circuit, proof = db_api_file.execute_query(
         "SELECT name FROM users WHERE id = 1", proof=True
     )
-    assert result == [["Alice"]]
+    assert result == [("Alice",)]
     verifier = ZkVerifier(circuit)
     assert verifier.run_verifier(proof)
 
 
-def test_execute_query_ifps(db_api_ipfs: DatabaseAPI):
+def test_execute_query_ipfs(db_api_ipfs: DatabaseAPI):
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "int", "name": "string"})
+    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
     db_api_ipfs.insert_into(table_name, {"id": 1, "name": "Alice"})
     result = db_api_ipfs.execute_query(f"SELECT name FROM {table_name} WHERE id = 1")
-    assert result == [["Alice"]]
+    assert result == [("Alice",)]
 
 
 def test_convert_text_to_embedding(db_api_file: DatabaseAPI):
@@ -90,21 +103,21 @@ def test_sql_embedding_search_ipfs():
     db = SimpleSQLDatabase(storage)
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
-    db.execute(f"CREATE TABLE {table_name} (id int, embedding list[float])")
+    db.execute(f"CREATE TABLE {table_name} (id INT, embedding TEXT)")
 
     # Insert some data
     db.execute(
-        f"INSERT INTO {table_name} (id, embedding) VALUES (1, [0.1, 0.2, 0.3]), (2, [0.4, 0.5, 0.6]), (3, [0.7, 0.8, 0.9])"
+        f"INSERT INTO {table_name} (id, embedding) VALUES (1, '[0.1, 0.2, 0.3]'), (2, '[0.4, 0.5, 0.6]'), (3, '[0.7, 0.8, 0.9]')"
     )
 
     # Perform a cosine similarity search
     target_vector = [0.1, 0.2, 0.35]
     result = db.execute(
-        f"SELECT id FROM {table_name} LIMIT 1 COSINE SIMILARITY embedding WITH {target_vector}"
+        f"SELECT id, embedding FROM {table_name} LIMIT 1 COSINE SIMILARITY embedding WITH {target_vector}"
     )
 
     # Check if the result is as expected
-    assert result == [[1, [0.1, 0.2, 0.3]]], f"Expected [[1]], but got {result}"
+    assert result == [(1, '[0.1, 0.2, 0.3]')], f"Expected [(1, '[0.1, 0.2, 0.3]')], but got {result}"
 
 
 def test_sql_embedding_search_ipfs_with_text():
@@ -112,13 +125,13 @@ def test_sql_embedding_search_ipfs_with_text():
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
     db.execute_query(
-        f"CREATE TABLE {table_name} (id int, embedding list[float], text string)"
+        f"CREATE TABLE {table_name} (id INT, embedding text, text text)"
     )
     initial_text = "Good morning, its a beautiful day today!"
     initial_text_vector = db.convert_text_to_embedding(initial_text)
     # Insert some data
     db.execute_query(
-        f"INSERT INTO {table_name} (id, embedding, text) VALUES (1, {initial_text_vector}, '{initial_text}')"
+        f"INSERT INTO {table_name} (id, embedding, text) VALUES (1, '{initial_text_vector}', '{initial_text}')"
     )
 
     # Perform a cosine similarity search
@@ -129,7 +142,7 @@ def test_sql_embedding_search_ipfs_with_text():
         proof=True,
     )
     assert result == [
-        [1, initial_text_vector, "Good morning,its a beautiful day today!"]
-    ], f"Expected [[1]], but got {result}"
+        (1, str(initial_text_vector), "Good morning, its a beautiful day today!")
+    ], f"Expected [(1, str(initial_text_vector), 'Good morning, its a beautiful day today!')], but got {result}"
     verifier = ZkVerifier(circuit)
     assert verifier.run_verifier(proof), "Proof verification failed"
