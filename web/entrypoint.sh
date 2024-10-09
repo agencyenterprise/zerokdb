@@ -3,13 +3,13 @@
 # Function to start the app
 start_app() {
     echo "Starting the application..."
-    yarn start &
-    APP_PID=$!
+    yarn start
 }
 
 # Function to stop the app
 stop_app() {
     echo "Stopping the application..."
+    APP_PID=$(netstat -tnpl 2>/dev/null | grep ':3000' | awk '{print $7}' | cut -d'/' -f1)
     kill $APP_PID
     wait $APP_PID 2>/dev/null
 }

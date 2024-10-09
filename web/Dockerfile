@@ -1,8 +1,8 @@
 # Use the official Node.js 20 LTS image
 FROM node:20
 
-# Install git
-RUN apt-get update && apt-get install -y git
+# Install git and procps (for pkill)
+RUN apt-get update && apt-get install -y git procps lsof net-tools
 
 # Set the working directory
 WORKDIR /app
