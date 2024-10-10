@@ -195,6 +195,7 @@ CREATE TABLE ${table} (
                         ...formData,
                         semantic: e.target.value,
                         sql: "",
+                        table: e.target.value ? process.env.NEXT_PUBLIC_SEMANTIC_TABLE_NAME : "",
                       })
                     }
                   />
