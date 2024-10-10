@@ -11,6 +11,9 @@ from TextToEmbedding import TextToEmbedding
 
 from zerokdb.ipfs_storage import IPFSStorage
 
+from dotenv import load_dotenv
+
+load_dotenv()
 app = FastAPI()
 
 
@@ -61,6 +64,7 @@ async def get_cid_sequence_by_table_name(
             "sequence_cid": cid,
         }
     except Exception as e:
+        print('Error', e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
