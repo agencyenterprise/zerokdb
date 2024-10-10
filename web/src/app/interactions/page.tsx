@@ -195,6 +195,7 @@ CREATE TABLE ${table} (
                         ...formData,
                         semantic: e.target.value,
                         sql: "",
+                        table: e.target.value ? process.env.NEXT_PUBLIC_SEMANTIC_TABLE_NAME : "",
                       })
                     }
                   />
@@ -209,15 +210,9 @@ CREATE TABLE ${table} (
                   <input
                     type="text"
                     id="table"
-                    className="bg-tertiary-800 border border-secondary-500 text-secondary-100 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"
-                    value={formData.table}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        table: e.target.value,
-                        sql: "",
-                      })
-                    }
+                    className="bg-tertiary-800 border border-secondary-500 text-secondary-100 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 disabled:bg-tertiary-700 disabled:border-secondary-600 disabled:text-secondary-400 disabled:cursor-not-allowed"
+                    value={process.env.NEXT_PUBLIC_SEMANTIC_TABLE_NAME}
+                    disabled
                   />
                 </div>
               </div>

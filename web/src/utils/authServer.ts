@@ -31,6 +31,7 @@ export function getAddressFromPublicKey(publicKeyHex: string): string {
 }
 
 // Function to verify the signature and address
+// Function to verify the signature and address
 export function verifySignature(signatureObj: any): boolean {
   try {
     const { address, fullMessage, publicKey, signature } = signatureObj;
@@ -56,22 +57,16 @@ export function verifySignature(signatureObj: any): boolean {
     const publicKeyHex = publicKey.replace(/^0x/, "");
     const publicKeyBytes = Uint8Array.from(Buffer.from(publicKeyHex, "hex"));
 
-    // Extract signature bytes from nested data structure
-    const signatureDataObject = signature?.data?.data;
-    if (!signatureDataObject) {
-      console.error("Signature data is missing");
+    // Check if signature is a string and convert it to bytes if necessary
+    let signatureBytes;
+    if (typeof signature === "string") {
+      // Convert the signature hex string to bytes
+      const signatureHex = signature.replace(/^0x/, "");
+      signatureBytes = Uint8Array.from(Buffer.from(signatureHex, "hex"));
+    } else {
+      console.error("Invalid signature format");
       return false;
     }
-
-    const signatureBytesArray = Object.values(signatureDataObject).map(
-      (value) => {
-        if (typeof value !== "number") {
-          throw new Error("Invalid signature byte value");
-        }
-        return value;
-      },
-    );
-    const signatureBytes = Uint8Array.from(signatureBytesArray);
 
     // Ensure signatureBytes length is 64 bytes
     if (signatureBytes.length !== 64) {
