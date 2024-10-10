@@ -1,38 +1,55 @@
-# Use an official Python runtime as a parent image
-FROM python:3.12.4-slim as runner
+# Use an official Python 3.12.4 slim image as the base
+FROM python:3.12.4-slim
+
+# Set environment variables to prevent Python from writing .pyc files and buffering stdout/stderr
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install system dependencies, including libpq-dev for psycopg2
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     git \
     curl \
+    build-essential \
     libpq-dev \
+    net-tools \
+    openssh-client \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# Clone the zerokdb repository
-RUN git clone https://github.com/agencyenterprise/zerokdb.git
+# Add Poetry to PATH
+ENV PATH="/root/.local/bin:$PATH"
 
-# Navigate to the API directory
+# Verify Poetry installation
+RUN poetry --version
+
+# Pre clone repo
+RUN git clone https://github.com/agencyenterprise/zerokdb.git /app/zerokdb
 WORKDIR /app/zerokdb/zerokdbapi
 
-# Disable Poetry virtual environments
+# Install dependencies using Poetry
 RUN poetry config virtualenvs.create false
+RUN poetry lock
+RUN poetry install
 
-# Install Python dependencies using Poetry (without virtualenvs)
-RUN poetry install --no-root --no-interaction --no-ansi
+WORKDIR /app
+
+# Copy the entrypoint script into the container
+COPY entrypoint.sh /entrypoint.sh
+
+# Ensure the entrypoint script has Unix line endings
+RUN dos2unix /entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /entrypoint.sh
 
 # Expose port 8001 for the FastAPI application
 EXPOSE 8001
 
-# Set default environment variables (can be overridden by .env file)
-ENV API_HOST=http://localhost:8001
-
-# Define the default command to run the FastAPI application with Uvicorn
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Set the entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
