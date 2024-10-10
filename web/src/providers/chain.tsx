@@ -47,6 +47,8 @@ export function ChainProvider({ children }: { children: React.ReactNode }) {
           address: true,
         });
 
+        console.log("signature", signature);
+
         await fetch("/api/auth/login", {
           method: "POST",
           headers: {
