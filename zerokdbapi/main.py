@@ -40,6 +40,10 @@ async def get_table_sequence_client():
 async def get_sender():
     return Account.load_key(os.getenv("APTOS_PRIVATE_KEY"))
 
+@app.get("/health")
+async def health_check():
+    return {"status": "OK", "message": "Service is up and running"}
+
 @app.post("/sequence/name")
 async def get_cid_sequence_by_table_name(
     payload: EntityNamePayload,
