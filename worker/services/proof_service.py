@@ -2,7 +2,7 @@ import os
 from zerokdb.api import DatabaseAPI
 import json
 
-api_host=os.getenv("API_HOST") or "http://localhost:8001"
+api_host=os.getenv("API_HOST") or "https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org"
 
 async def generate_proof(
     proof_request_id: str, ai_model_name: str, ai_model_inputs: str, pinata_api_key: str

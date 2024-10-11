@@ -32,7 +32,7 @@ def db_api_file():
 
 @pytest.fixture
 def db_api_ipfs():
-    return DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='http://localhost:8001')
+    return DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org')
 
 
 def test_create_table(db_api_file: DatabaseAPI):
@@ -99,7 +99,7 @@ def test_convert_text_to_embedding(db_api_file: DatabaseAPI):
 
 
 def test_sql_embedding_search_ipfs():
-    storage = EnhancedFileStorage("embeddings_test_db", api_host="http://localhost:8001", pinata_api_key="test")
+    storage = EnhancedFileStorage("embeddings_test_db", api_host="https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org", pinata_api_key="test")
     db = SimpleSQLDatabase(storage)
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
@@ -121,7 +121,7 @@ def test_sql_embedding_search_ipfs():
 
 
 def test_sql_embedding_search_ipfs_with_text():
-    db = DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='http://localhost:8001')
+    db = DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org')
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
     db.execute_query(
