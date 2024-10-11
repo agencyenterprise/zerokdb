@@ -1,7 +1,7 @@
 import httpx
 import os
 
-hub_url = os.getenv("HUB_URL") or "http://localhost:8000"
+hub_url = os.getenv("HUB_URL") or "https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com"
 
 def call_hub_post(endpoint, data, headers={}):
   response = httpx.post(hub_url + endpoint, json=data, headers=headers, timeout=600)

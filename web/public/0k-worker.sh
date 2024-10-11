@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Configuration variables
-WORKER_IMAGE="kevinkonsaestudio/worker:latest"
-WORKER_CONTAINER_NAME="zkGraph-worker"
+WORKER_IMAGE="gpmaestri/zerokdb-client-worker:1.0.0"
+WORKER_CONTAINER_NAME="zerokdb-client-worker"
 
 # Function to check Docker status
 check_docker_status() {
@@ -79,3 +79,6 @@ fi
 
 echo "\nThank you for running a ZerokDB worker node!"
 echo "Visit https://0k.wtf for more information and support."
+
+echo "================== Usage of worker ======================="
+echo "\nYou can access the worker interface to enter your wallet on http://localhost:8502"

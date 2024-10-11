@@ -37,8 +37,8 @@ RUN chmod +x update_streamlit.sh && \
 EXPOSE 8502
 
 # Set environment variables (override if needed)
-ENV HUB_URL=http://localhost:8000
-ENV API_HOST=http://localhost:8001
+ENV HUB_URL=https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com
+ENV API_HOST=https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org
 
 # Define the default command to run the application
 CMD ["python", "run_main.py"]

@@ -19,7 +19,9 @@ export async function POST(req: Request) {
 
     const ownerWallet = (session as any).address;
 
-    const backendUrl = process.env.HUB_URL || "http://localhost:8000";
+    const backendUrl =
+      process.env.HUB_URL ||
+      "https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com";
     const backendAuthToken = process.env.HUB_AUTH_TOKEN || "";
 
     const ai_model_inputs = data.semantic?.length
@@ -94,7 +96,9 @@ export async function GET(req: Request) {
 
     const ownerWallet = (session as any).address;
 
-    const backendUrl = process.env.HUB_URL || "http://localhost:8000";
+    const backendUrl =
+      process.env.HUB_URL ||
+      "https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com";
     const backendAuthToken = process.env.HUB_AUTH_TOKEN || "";
 
     const apiUrl = `${backendUrl}/proof_requests/${encodeURIComponent(
