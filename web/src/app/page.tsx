@@ -14,15 +14,20 @@ import {
   faMemory,
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [proverCommand, setProverCommand] = useState(
+    "export curl -sSL https://b4vue13qqtcrf2u0vi7ko0jdu0.ingress.akash-palmito.org/0k-worker.sh | sh",
+  );
 
-  const proverCommand =
-    "export curl -sSL https://b4vue13qqtcrf2u0vi7ko0jdu0.ingress.akash-palmito.org/0k-worker.sh | sh";
+  useEffect(() => {
+    const origin = window.location.origin;
+    setProverCommand(`export curl -sSL ${origin}/0k-worker.sh | sh`);
+  }, []);
 
   const copyCommand = () => {
     navigator.clipboard.writeText(proverCommand);
@@ -73,8 +78,7 @@ export default function Home() {
 
   const handleDownload = async () => {
     setLoading(true);
-    const url =
-      "https://turquoise-efficient-guan-536.mypinata.cloud/ipfs/QmVqp2ZjbswBcWu92Xy6BEZpALnr3tpJapq2ETYU56xVXb";
+    const url = process.env.NEXT_PUBLIC_EXECUTABLE_DOWNLOAD || "";
     const filename = "0k-db-worker.zip";
 
     try {
