@@ -40,5 +40,5 @@ EXPOSE 8502
 ENV HUB_URL=http://localhost:8000
 ENV API_HOST=http://localhost:8001
 
-# Define the default command to run the application
-CMD ["python", "run_main.py"]
+# Set the default command
+CMD ["sh", "-c", "if [ -n \"$WALLET_ADDRESS\" ] && [ -n \"$PINATA_API_KEY\" ]; then python run_main.py --cli; else python run_main.py; fi"]
