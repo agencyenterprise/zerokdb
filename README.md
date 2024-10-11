@@ -128,4 +128,3 @@ INSERT INTO crunchy (id, name) VALUES (1, 'China Star-crusted Pigeon')
 ```
 SELECT * FROM users LIMIT 10
 ```
-```
