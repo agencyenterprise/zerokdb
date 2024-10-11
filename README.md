@@ -97,3 +97,35 @@ The ZeroKDB Platform operates through a coordinated interaction between its comp
 6. **Payment Allocation:**
    - Once the proof is verified, the Hub credits the worker with the appropriate amount of credits.
    - Credits are deducted from the user's locked credits, ensuring a fair payment mechanism.
+  
+# Getting Started
+
+## Interact with ZeroKDB
+
+1. Visit https://db.0k.wtf
+2. Click on DB Interactions in the menu
+3. Use the provided interface to use the database.
+
+## Example Queries
+
+### Create a table
+
+```
+CREATE TABLE crunchy (
+  id int,
+  name string
+);
+```
+
+### Insert some data
+
+```
+INSERT INTO crunchy (id, name) VALUES (1, 'China Star-crusted Pigeon')
+```
+
+### Select some data
+
+```
+SELECT * FROM users LIMIT 10
+```
+```
