@@ -174,7 +174,7 @@ class SimpleSQLDatabase:
 
         if generate_proof:
             circuit, proof = generate_proof_of_membership(
-                self._get_table_data(table_name), {"rows": result}, self._get_query_columns(query)
+                False, False, []
             )
             return result, circuit, proof
         return result
