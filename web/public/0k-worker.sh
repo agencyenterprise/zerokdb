@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Configuration variables
-WORKER_IMAGE="gpmaestri/zerokdb-client-worker:1.0.0"
+WORKER_IMAGE="gpmaestri/zerokdb-client-worker:1.0.1"
 WORKER_CONTAINER_NAME="zerokdb-client-worker"
 
 # Function to check Docker status
