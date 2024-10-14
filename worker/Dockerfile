@@ -17,7 +17,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
 # Clone the zerokdb repository
-RUN git clone https://github.com/agencyenterprise/zerokdb.git
+RUN git clone -b feature/50b-209-deploy-final-version-of-worker-on-akash https://github.com/agencyenterprise/zerokdb.git
 
 # Navigate to the worker directory
 WORKDIR /app/zerokdb/worker
@@ -29,9 +29,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-root --no-interaction --no-ansi
 
 # Modify Streamlit's cli.py (Ensure Streamlit is installed)
-COPY update_streamlit.sh .
-RUN chmod +x update_streamlit.sh && \
-    ./update_streamlit.sh
+RUN chmod +x /app/zerokdb/worker/update_streamlit.sh && /app/zerokdb/worker/update_streamlit.sh
 
 # Expose port 8502 for the application
 EXPOSE 8502
