@@ -5,7 +5,6 @@ from services.proof_service import generate_proof
 import base64
 import dill
 
-
 def process_designated_proof_requests(signature_message_id: bytes, signature: str, pinata_api_key: str):
     print("Fetching designated proof requests...")
 
@@ -41,8 +40,10 @@ def process_designated_proof_requests(signature_message_id: bytes, signature: st
                 pinata_api_key,
             )
         )
-        b64_circuit = base64.b64encode(dill.dumps(circuit)).decode()
-        b64_proof = base64.b64encode(proof).decode()
+
+        b64_circuit = base64.b64encode(dill.dumps(circuit)).decode() if circuit else ""
+        b64_proof = base64.b64encode(proof).decode() if proof else ""
+
         call_hub_post(
             "/proof_requests/proof/" + proof_request["id"],
             {

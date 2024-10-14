@@ -4,6 +4,7 @@ import base64
 import threading
 import queue
 import time
+import argparse
 from dotenv import load_dotenv
 from Crypto.PublicKey import RSA
 import schedule
@@ -52,19 +53,21 @@ def start_worker(pina_api_key, wallet):
 def stop_worker():
     """Stop the worker and clear the scheduled jobs."""
     print("Stopping worker...")
-    st.session_state.worker_running = False
-    st.session_state.log_messages = []
+    if 'st' in globals():
+        st.session_state.worker_running = False
+        st.session_state.log_messages = []
 
     schedule.clear()
     worker_running_event.clear()
     print("Jobs stopped.")
-    st.rerun()
+    if 'st' in globals():
+        st.rerun()
 
 def run_schedule():
     """Run pending scheduled jobs."""
     schedule.run_pending()
 
-def main():
+def run_streamlit():
     sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
     st.title("ZerokDB Worker Setup")
     st.subheader("Welcome to the ZerokDB Worker!")
@@ -144,6 +147,32 @@ def main():
             st.session_state.log_messages.append(log_message)  # Store log message in session state
         time.sleep(2)  # Sleep to reduce the frequency of updates
         st.rerun()
+
+def run_cli(wallet, api_key):
+    print(f"Starting worker in CLI mode with wallet: {wallet}")
+    start_worker(api_key, wallet)
+    while True:
+        run_schedule()
+        time.sleep(1)
+
+def main():
+    parser = argparse.ArgumentParser(description="Zerokdb Worker")
+    parser.add_argument("--cli", action="store_true", help="Run in CLI mode")
+    parser.add_argument("--wallet", type=str, help="APTOS wallet address")
+    parser.add_argument("--api-key", type=str, help="Pinata API Key")
+    parser.add_argument("--run", action="store_true", help="Run in Streamlit mode")
+    args = parser.parse_args()
+
+    if args.cli:
+        if not args.wallet or not args.api_key:
+            print("Error: Both wallet address and API key are required for CLI mode.")
+            sys.exit(1)
+        run_cli(args.wallet, args.api_key)
+    elif args.run:
+        run_streamlit()
+    else:
+        print("Error: Please specify either --cli or --run mode.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

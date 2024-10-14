@@ -194,3 +194,5 @@ contracts/cache
 a.py
 
 *.db
+
+.main.py

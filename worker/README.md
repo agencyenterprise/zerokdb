@@ -2,15 +2,17 @@
 
 ## Table of Contents
 
-- [Python Version](#python-version)
-- [Installation](#installation)
-  - [Clone the Repository](#clone-the-repository)
-  - [Create a Virtual Environment](#create-a-virtual-environment)
-  - [Install Dependencies](#install-dependencies)
-  - [Environment Variables](#environment-variables)
-  - [Modifying Streamlit Library](#modifying-streamlit-library)
-- [Running the Application](#running-the-application)
-- [Building the Executable](#building-the-executable)
+- [Running the Worker application](#running-the-worker-application)
+  - [Table of Contents](#table-of-contents)
+  - [Python Version](#python-version)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+  - [Building the Executable](#building-the-executable)
+    - [Building the Docker Image](#building-the-docker-image)
+    - [Running in Streamlit Mode](#running-in-streamlit-mode)
+    - [Running in CLI Mode](#running-in-cli-mode)
+    - [Environment Variables](#environment-variables)
+    - [Ports](#ports)
 
 ## Python Version
 
@@ -100,16 +102,55 @@ python run_main.py
    ./dist/run_main
    ```
 
-## Building Docker Container
+### Building the Docker Image
 
-1. **Building:**
+First, build the Docker image:
 
-   ```bash
-   docker build -t zerokdb-worker .
-   ```
+```bash
+docker build -t zerokdb-worker .
+```
 
-1. **Running Container:**
+### Running in Streamlit Mode
 
-   ```bash
-   docker run -d -p 8502:8502 --name zerokdb-worker-container zerokdb-worker
-   ```
+To run the worker in Streamlit mode (default):
+
+```bash
+docker run -p 8502:8502 zerokdb-worker
+```
+
+This will start the Streamlit interface, accessible at `http://localhost:8502`.
+
+### Running in CLI Mode
+
+To run the worker in CLI mode:
+
+```bash
+docker run -e WALLET_ADDRESS=your_wallet_address -e PINATA_API_KEY=your_api_key zerokdb-worker
+```
+
+Replace `your_wallet_address` with your actual APTOS wallet address and `your_api_key` with your Pinata API key.
+
+### Environment Variables
+
+The following environment variables can be set:
+
+- `WALLET_ADDRESS`: Your APTOS wallet address (required for CLI mode)
+- `PINATA_API_KEY`: Your Pinata API key (required for CLI mode)
+- `HUB_URL`: URL of the hub (default: http://localhost:8000)
+- `API_HOST`: API host URL (default: http://localhost:8001)
+
+You can override these variables when running the Docker container:
+
+```bash
+docker run -e HUB_URL=http://custom-hub-url -e API_HOST=http://custom-api-host zerokdb-worker
+```
+
+### Ports
+
+The Streamlit interface runs on port 8502. Make sure to map this port when running in Streamlit mode:
+
+```bash
+docker run -p 8502:8502 zerokdb-worker
+```
+
+This setup allows for flexible deployment of the worker in both interactive (Streamlit) and automated (CLI) modes.
