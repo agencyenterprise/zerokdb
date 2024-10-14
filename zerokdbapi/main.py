@@ -54,7 +54,13 @@ async def get_cid_sequence_by_table_name(
     client: TableSequenceClient = Depends(get_table_sequence_client)
 ):
     try:
-        result = await client.get_sequence_by_table_name(str(account.address()), payload.entity_name)
+        try:
+            result = await client.get_sequence_by_table_name(account.address().__str__(), payload.entity_name)
+        except Exception as e:
+            if "ABORTED" in str(e) and "get_sequence_by_table_name" in str(e):
+                return {}
+            else:
+                raise
         if not result:
             raise HTTPException(status_code=404, detail="Entity not found.")
 

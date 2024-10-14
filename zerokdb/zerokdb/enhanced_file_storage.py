@@ -52,11 +52,14 @@ class EnhancedFileStorage:
             print(f"Loading data for table {table_name}")
             storage = IPFSStorage(pinata_api_key=self.pinata_api_key)
             sequence = self.get_table_sequence_by_name(table_name)
+            if not sequence:
+                print(f"No sequence found for table {table_name}")
+                return {}
             cid = sequence["sequence_cid"]
             return storage.download_db(cid)
         except Exception as e:
-            print(e)
-            return {}
+            print(f"Error getting table sequence or downloading data for {table_name}: {e}")
+            raise e
 
     def append_data_to_api(self, table_name, data) -> Dict[str, Any]:
         """

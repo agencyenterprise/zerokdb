@@ -1,7 +1,6 @@
 import os
 import time
 
-import pytest
 from zerok.verifier.verifier import ZkVerifier
 
 from zerokdb.api import DatabaseAPI
@@ -9,8 +8,7 @@ from zerokdb.enhanced_file_storage import EnhancedFileStorage
 from zerokdb.simple_sql_db import SimpleSQLDatabase
 
 
-@pytest.fixture
-def db_api_file():
+def create_db_api_file():
     # remove test_db.json file if it exists
     try:
         os.remove("test_db.json")
@@ -30,52 +28,67 @@ def db_api_file():
     return db_api
 
 
-@pytest.fixture
-def db_api_ipfs():
-    return DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org')
+def create_db_api_ipfs():
+    return DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='http://localhost:8001')
 
 
-def test_create_table(db_api_file: DatabaseAPI):
+def test_create_table():
+    db_api = create_db_api_file()
     table_name = "users"
-    db_api_file.create_table(table_name, {"id": "INT", "name": "STRING"})
-    result = db_api_file.execute_query(f"SELECT * FROM {table_name}")
+    db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_file()
+    result = db_api.execute_query(f"SELECT * FROM {table_name}")
     assert result == []
 
 
-def test_create_table_ipfs(db_api_ipfs: DatabaseAPI):
+def test_create_table_ipfs():
+    db_api = create_db_api_ipfs()
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
-    result = db_api_ipfs.execute_query(f"SELECT * FROM {table_name}")
+    db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_ipfs()
+    result = db_api.execute_query(f"SELECT * FROM {table_name}")
     assert result == []
 
 
-def test_insert_into(db_api_file: DatabaseAPI):
+def test_insert_into():
+    db_api = create_db_api_file()
     table_name = "users"
-    db_api_file.create_table(table_name, {"id": "INT", "name": "STRING"})
-    db_api_file.insert_into(table_name, {"id": 1, "name": "Alice"})
-    result = db_api_file.execute_query(f"SELECT * FROM {table_name}")
+    db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_file()
+    db_api.insert_into(table_name, {"id": 1, "name": "Alice"})
+    db_api = create_db_api_file()
+    result = db_api.execute_query(f"SELECT * FROM {table_name}")
     assert result == [(1, "Alice")]
 
 
-def test_insert_into_ipfs(db_api_ipfs: DatabaseAPI):
+def test_insert_into_ipfs():
+    db_api = create_db_api_ipfs()
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
-    db_api_ipfs.insert_into(table_name, {"id": 1, "name": "Alice"})
-    result = db_api_ipfs.execute_query(f"SELECT * FROM {table_name}")
+    db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_ipfs()
+    db_api.insert_into(table_name, {"id": 1, "name": "Alice"})
+    db_api = create_db_api_ipfs()
+    result = db_api.execute_query(f"SELECT * FROM {table_name}")
     assert result == [(1, "Alice")]
 
 
-def test_execute_query(db_api_file: DatabaseAPI):
-    db_api_file.create_table("users", {"id": "INT", "name": "STRING"})
-    db_api_file.insert_into("users", {"id": 1, "name": "Alice"})
-    result = db_api_file.execute_query("SELECT name FROM users WHERE id = 1")
+def test_execute_query():
+    db_api = create_db_api_file()
+    db_api.create_table("users", {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_file()
+    db_api.insert_into("users", {"id": 1, "name": "Alice"})
+    db_api = create_db_api_file()
+    result = db_api.execute_query("SELECT name FROM users WHERE id = 1")
     assert result == [("Alice",)]
 
 
-def test_execute_query_with_proof(db_api_file: DatabaseAPI):
-    db_api_file.create_table("users", {"id": "int", "name": "STRING"})
-    db_api_file.insert_into("users", {"id": 1, "name": "Alice"})
-    result, circuit, proof = db_api_file.execute_query(
+def test_execute_query_with_proof():
+    db_api = create_db_api_file()
+    db_api.create_table("users", {"id": "int", "name": "STRING"})
+    db_api = create_db_api_file()
+    db_api.insert_into("users", {"id": 1, "name": "Alice"})
+    db_api = create_db_api_file()
+    result, circuit, proof = db_api.execute_query(
         "SELECT name FROM users WHERE id = 1", proof=True
     )
     assert result == [("Alice",)]
@@ -83,17 +96,21 @@ def test_execute_query_with_proof(db_api_file: DatabaseAPI):
     assert verifier.run_verifier(proof)
 
 
-def test_execute_query_ipfs(db_api_ipfs: DatabaseAPI):
+def test_execute_query_ipfs():
+    db_api = create_db_api_ipfs()
     table_name = f"users{int(time.time())}"
-    db_api_ipfs.create_table(table_name, {"id": "INT", "name": "STRING"})
-    db_api_ipfs.insert_into(table_name, {"id": 1, "name": "Alice"})
-    result = db_api_ipfs.execute_query(f"SELECT name FROM {table_name} WHERE id = 1")
+    db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
+    db_api = create_db_api_ipfs()
+    db_api.insert_into(table_name, {"id": 1, "name": "Alice"})
+    db_api = create_db_api_ipfs()
+    result = db_api.execute_query(f"SELECT name FROM {table_name} WHERE id = 1")
     assert result == [("Alice",)]
 
 
-def test_convert_text_to_embedding(db_api_file: DatabaseAPI):
+def test_convert_text_to_embedding():
+    db_api = create_db_api_file()
     text = "Hello world"
-    embedding = db_api_file.convert_text_to_embedding(text)
+    embedding = db_api.convert_text_to_embedding(text)
     assert isinstance(embedding, list)
     assert len(embedding) > 0
 
@@ -121,23 +138,25 @@ def test_sql_embedding_search_ipfs():
 
 
 def test_sql_embedding_search_ipfs_with_text():
-    db = DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org')
+    db_api = create_db_api_ipfs()
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
-    db.execute_query(
+    db_api.execute_query(
         f"CREATE TABLE {table_name} (id INT, embedding text, text text)"
     )
+    db_api = create_db_api_ipfs()
     initial_text = "Good morning, its a beautiful day today!"
-    initial_text_vector = db.convert_text_to_embedding(initial_text)
+    initial_text_vector = db_api.convert_text_to_embedding(initial_text)
     # Insert some data
-    db.execute_query(
+    db_api.execute_query(
         f"INSERT INTO {table_name} (id, embedding, text) VALUES (1, '{initial_text_vector}', '{initial_text}')"
     )
 
     # Perform a cosine similarity search
+    db_api = create_db_api_ipfs()
     target_text = "Is today a beautiful day?"
-    target_vector = db.convert_text_to_embedding(target_text)
-    result, circuit, proof = db.execute_query(
+    target_vector = db_api.convert_text_to_embedding(target_text)
+    result, circuit, proof = db_api.execute_query(
         f"SELECT * FROM {table_name} LIMIT 1 COSINE SIMILARITY embedding WITH {target_vector}",
         proof=True,
     )
