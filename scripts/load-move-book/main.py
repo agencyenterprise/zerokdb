@@ -1,5 +1,4 @@
 import os
-import time
 import requests
 import PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -16,27 +15,21 @@ def extract_text_from_pdf(pdf_path):
 
 # Step 2: Split text into paragraphs (chunks)
 def split_text_into_paragraphs(text, chunk_size=2000, chunk_overlap=200):
-
-    # Using RecursiveCharacterTextSplitter from Langchain to split by paragraphs
     text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n"],  # Split by paragraph breaks
+        separators=["\n\n", "\n"],
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=len
     )
 
     pages = text.split("The Move Book\nhttps://move-book.com/print.html")
-
-    # Create chunks
     chunks = text_splitter.create_documents(pages)
-
-    # Extract the chunk text for each chunk
-    chunk_list = [chunk.page_content for chunk in chunks]
+    chunk_list = [chunk.page_content for chunk in chunks[:2]]
     return chunk_list
 
 # Step 3: Convert text to embeddings via HTTP request to ZeroKDB API
 def generate_embeddings_via_api(paragraph):
-    url = f"{api_url}/convert-to-embedding"  # Adjust the URL according to your API route
+    url = f"{api_url}/convert-to-embedding"
     payload = {"text": paragraph}
     response = requests.post(url, json=payload)
     if response.status_code == 200:
@@ -49,7 +42,14 @@ def create_table_if_not_exists(table_name):
     url = f"{api_url}/entity"
     payload = {
         "entity_name": table_name,
-        "data": {}  # Assuming an empty initial data set
+        "data": {
+            table_name: {
+                "columns": ["id", "embedding", "text"],
+                "column_types": {"id": "INT", "embedding": "TEXT", "text": "TEXT"},
+                "rows": [],
+                "indexes": {}
+            }
+        }
     }
     response = requests.post(url, json=payload)
     if response.status_code == 200:
@@ -66,9 +66,12 @@ def store_in_db_via_api(table_name, paragraphs, embeddings):
         payload = {
             "table_name": table_name,
             "data": {
-                "id": i,
-                "paragraph": paragraph,
-                "embedding": embedding
+                table_name: {
+                    "columns": ["id", "embedding", "text"],
+                    "column_types": {"id": "INT", "embedding": "TEXT", "text": "TEXT"},
+                    "indexes": {},
+                    "rows": [[i, str(embedding), paragraph]]
+                }
             }
         }
         response = requests.post(url, json=payload)
@@ -77,26 +80,17 @@ def store_in_db_via_api(table_name, paragraphs, embeddings):
 
 # Main function to handle the entire flow
 def process_pdf_to_zerokdb(pdf_path, table_name="pdf_data", create_table=True):
-    # Extract text
     text = extract_text_from_pdf(pdf_path)
-
-    # Optionally create a new table
     if create_table:
         create_table_if_not_exists(table_name)
-
-    # Split the text into paragraph chunks
     paragraphs = split_text_into_paragraphs(text)
-
-    # Generate embeddings for each paragraph
     embeddings = [generate_embeddings_via_api(paragraph) for paragraph in paragraphs]
-
-    # Store data in ZeroKDB via API
     store_in_db_via_api(table_name, paragraphs, embeddings)
 
 # Entry point
 if __name__ == "__main__":
     pdf_path = "data/move-book.pdf"
-    table_name = f"move_book"
+    table_name = "move_book_test_3"
 
     try:
         process_pdf_to_zerokdb(pdf_path, table_name, create_table=True)

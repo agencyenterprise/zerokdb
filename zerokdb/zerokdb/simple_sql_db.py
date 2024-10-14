@@ -18,45 +18,44 @@ class SimpleSQLDatabase:
         self,
         storage: Union[EnhancedFileStorage, FileStorage],
         change_tracker: Optional[ChangeTracker] = None,
-        cid: Optional[str] = "0x0",
-        sequence_cid: Optional[str] = "0x0",
     ):
-        self.cid = cid
-        self.sequence_cid = sequence_cid
         self.storage = storage
         self.change_tracker = change_tracker
         self.conn = sqlite3.connect(':memory:')
         self.cursor = self.conn.cursor()
-        self._load_data_from_storage()
 
-    def _load_data_from_storage(self):
-        data = self.storage.load(self.cid) if self.cid else {}
-        for table_name, table_data in data.items():
-            columns = ', '.join([f"{col} {dtype}" for col, dtype in table_data['column_types'].items()])
-            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
-            for row in table_data['rows']:
-                placeholders = ', '.join(['?' for _ in row])
-                self.cursor.execute(f"INSERT INTO {table_name} VALUES ({placeholders})", row)
+    def _load_data_from_storage(self, table_name: str):
+        data = self.storage.load(table_name)
+
+        if not data or table_name not in data:
+            return
+
+        table_data = data[table_name]
+        columns = ', '.join([f"{col} {dtype}" for col, dtype in table_data['column_types'].items()])
+        self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
+
+        if table_data['rows']:
+            placeholders = ', '.join(['?' for _ in table_data['columns']])
+            self.cursor.executemany(f"INSERT INTO {table_name} VALUES ({placeholders})", table_data['rows'])
+
         self.conn.commit()
 
     def execute(
         self,
         query: str,
-        cid: Optional[str] = None,
-        sequence_cid: Optional[str] = None,
         generate_proof: bool = False,
     ):
         query = query.strip()
-        self.cid = cid or self.cid
-        self.sequence_cid = sequence_cid or self.sequence_cid
+
+        table_name = self._extract_table_name(query)
+        self._load_data_from_storage(table_name)
+
         if self.change_tracker:
             self.change_tracker.log_change(query, self._get_tables_data())
 
         if query.startswith("CREATE TABLE"):
             table_name = self._create_table(query)
-            storage_data = self.storage.create_table(table_name, self._get_tables_data())
-            self.cid = storage_data.get("data_cid", None)
-            self.sequence_cid = storage_data.get("sequence_cid", None)
+            self.storage.create_table(table_name, self._get_tables_data())
             rows = self._get_table_rows(table_name)
             circuit, proof = generate_proof_of_membership(
                 self._get_table_data(table_name), [], []
@@ -73,11 +72,9 @@ class SimpleSQLDatabase:
             print(f"Inserted data locally in {time.time() - start} seconds")
 
             new_table_chunk = {table_name: self._get_table_data(table_name)}
-            storage_data = self.storage.save(new_table_chunk, table_name)
+            self.storage.save(new_table_chunk, table_name)
 
             print(f"Saved updated data on IPFS in {time.time() - start} seconds")
-            self.cid = storage_data.get("data_cid", None)
-            self.sequence_cid = storage_data.get("sequence_cid", None)
             rows = self._get_table_rows(table_name)
             circuit, proof = generate_proof_of_membership(
                 self._get_table_data(table_name), new_table_chunk[table_name], []
