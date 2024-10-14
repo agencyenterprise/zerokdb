@@ -18,10 +18,14 @@ if __name__ == '__main__':
 developmentMode = false
 
 [server]
+headless = true
 port = 8502
+address = "0.0.0.0"
                 """)
 
     cli._main_run_clExplicit('.main.py', args=['run'],flag_options={
         "server.enableCORS": True,
         "server.enableXsrfProtection": False,
+        "server.port": 8502,
+        "server.address": "0.0.0.0"
     })

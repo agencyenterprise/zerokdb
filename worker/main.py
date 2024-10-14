@@ -66,8 +66,8 @@ def run_schedule():
 
 def main():
     sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
-    st.title("zkGraph Worker Setup")
-    st.subheader("Welcome to the zkGraph Worker!")
+    st.title("ZerokDB Worker Setup")
+    st.subheader("Welcome to the ZerokDB Worker!")
     st.markdown('<br style="margin-bottom:16px">', unsafe_allow_html=True)
 
     # Initialize session state
@@ -88,12 +88,13 @@ def main():
             <style>
             .custom-log-area {
                 margin-top: -16px;
-                background-color: #262730;
+                background-color: rgb(180, 180, 180);
                 border-radius: 8px;
                 padding: 10px;
                 height: 310px;
                 width: 360px;
                 overflow-y: auto;
+                color: var(--text-color);
             }
             </style>
             """,
