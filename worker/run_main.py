@@ -32,7 +32,9 @@ address = "0.0.0.0"
 if __name__ == '__main__':
     import main
 
-    if len(sys.argv) > 1 and sys.argv[1] == '--cli':
+    cli = os.environ.get('CLI')
+
+    if cli:
         # Run in CLI mode
         wallet = os.environ.get('WALLET_ADDRESS')
         api_key = os.environ.get('PINATA_API_KEY')

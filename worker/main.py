@@ -156,23 +156,20 @@ def run_cli(wallet, api_key):
         time.sleep(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="Zerokdb Worker")
-    parser.add_argument("--cli", action="store_true", help="Run in CLI mode")
-    parser.add_argument("--wallet", type=str, help="APTOS wallet address")
-    parser.add_argument("--api-key", type=str, help="Pinata API Key")
-    parser.add_argument("--run", action="store_true", help="Run in Streamlit mode")
-    args = parser.parse_args()
 
-    if args.cli:
-        if not args.wallet or not args.api_key:
+    cli = os.environ.get('CLI')
+
+    if cli:
+
+        wallet = os.environ.get('WALLET_ADDRESS')
+        api_key = os.environ.get('PINATA_API_KEY')
+        if not wallet or not api_key:
             print("Error: Both wallet address and API key are required for CLI mode.")
             sys.exit(1)
-        run_cli(args.wallet, args.api_key)
-    elif args.run:
-        run_streamlit()
+        run_cli(wallet, api_key)
+
     else:
-        print("Error: Please specify either --cli or --run mode.")
-        sys.exit(1)
+        run_streamlit()
 
 if __name__ == "__main__":
     main()
