@@ -21,12 +21,12 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [proverCommand, setProverCommand] = useState(
-    "export curl -sSL https://b4vue13qqtcrf2u0vi7ko0jdu0.ingress.akash-palmito.org/0k-worker.sh | sh",
+    "curl -sSL https://b4vue13qqtcrf2u0vi7ko0jdu0.ingress.akash-palmito.org/0k-worker.sh | sh",
   );
 
   useEffect(() => {
     const origin = window.location.origin;
-    setProverCommand(`export curl -sSL ${origin}/0k-worker.sh | sh`);
+    setProverCommand(`curl -sSL ${origin}/0k-worker.sh | sh`);
   }, []);
 
   const copyCommand = () => {

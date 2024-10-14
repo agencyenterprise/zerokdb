@@ -3,5 +3,11 @@
 developmentMode = false
 
 [server]
+headless = true
 port = 8502
+<<<<<<< HEAD
+address = "0.0.0.0"
+                
+=======
         
+>>>>>>> 5631c85c765376ba68358afba1e30eefe10e2d0e
