@@ -46,6 +46,7 @@ class IPFSStorage:
         else:
             response.raise_for_status()
 
+    @retry(wait=wait_exponential(min=4, max=10))
     def read_from_ipfs_pinata(self, cid: str) -> Dict[str, Any]:
         """
         Utility function to read data from IPFS using Pinata.
