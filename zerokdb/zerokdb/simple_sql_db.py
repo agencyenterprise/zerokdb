@@ -21,7 +21,7 @@ class SimpleSQLDatabase:
     ):
         self.storage = storage
         self.change_tracker = change_tracker
-        self.conn = sqlite3.connect(':memory:')
+        self.conn = sqlite3.connect(":memory:")
         self.cursor = self.conn.cursor()
 
     def _load_data_from_storage(self, table_name: str):
@@ -31,12 +31,17 @@ class SimpleSQLDatabase:
             return
 
         table_data = data[table_name]
-        columns = ', '.join([f"{col} {dtype}" for col, dtype in table_data['column_types'].items()])
+        columns = ", ".join(
+            [f"{col} {dtype}" for col, dtype in table_data["column_types"].items()]
+        )
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
 
-        if table_data['rows']:
-            placeholders = ', '.join(['?' for _ in table_data['columns']])
-            self.cursor.executemany(f"INSERT INTO {table_name} VALUES ({placeholders})", table_data['rows'])
+        if table_data["rows"]:
+            placeholders = ", ".join(["?" for _ in table_data["columns"]])
+            self.cursor.execute(f"DELETE FROM {table_name}")
+            self.cursor.executemany(
+                f"INSERT INTO {table_name} VALUES ({placeholders})", table_data["rows"]
+            )
 
         self.conn.commit()
 
@@ -107,7 +112,9 @@ class SimpleSQLDatabase:
         return self._extract_table_name(query)
 
     def _extract_table_name(self, query: str):
-        match = re.search(r"(?:CREATE TABLE|INSERT INTO|FROM)\s+(\w+)", query, re.IGNORECASE)
+        match = re.search(
+            r"(?:CREATE TABLE|INSERT INTO|FROM)\s+(\w+)", query, re.IGNORECASE
+        )
         if match:
             return match.group(1)
         raise ValueError("Could not extract table name from query")
@@ -127,7 +134,7 @@ class SimpleSQLDatabase:
             "columns": columns,
             "column_types": column_types,
             "rows": rows,
-            "indexes": {}
+            "indexes": {},
         }
 
     def _get_table_rows(self, table_name: str):
@@ -137,7 +144,7 @@ class SimpleSQLDatabase:
     def _get_query_columns(self, query: str):
         match = re.match(r"SELECT\s+(.+?)\s+FROM", query, re.IGNORECASE)
         if match:
-            columns = match.group(1).split(',')
+            columns = match.group(1).split(",")
             return [col.strip() for col in columns]
         return []
 
@@ -145,40 +152,44 @@ class SimpleSQLDatabase:
         match = re.match(
             r"SELECT (.+) FROM (\w+)(?: WHERE (.+))?(?: LIMIT (\d+))? COSINE SIMILARITY (.+) WITH (.+)$",
             query,
-            re.IGNORECASE
+            re.IGNORECASE,
         )
         if not match:
             raise ValueError("Invalid COSINE SIMILARITY query syntax")
 
-        columns, table_name, where_clause, limit, vector_column, target_vector = match.groups()
+        columns, table_name, where_clause, limit, vector_column, target_vector = (
+            match.groups()
+        )
         target_vector = np.fromstring(target_vector.strip("[]"), sep=",")
 
         # Fetch all rows
         where_sql = f"WHERE {where_clause}" if where_clause else ""
-        self.cursor.execute(f"SELECT {columns}, {vector_column} FROM {table_name} {where_sql}")
+        self.cursor.execute(
+            f"SELECT {columns}, {vector_column} FROM {table_name} {where_sql}"
+        )
         rows = self.cursor.fetchall()
 
         # Calculate cosine similarities
         similarities = []
         for row in rows:
             vector = np.fromstring(row[-1].strip("[]"), sep=",")
-            similarity = np.dot(vector, target_vector) / (np.linalg.norm(vector) * np.linalg.norm(target_vector))
+            similarity = np.dot(vector, target_vector) / (
+                np.linalg.norm(vector) * np.linalg.norm(target_vector)
+            )
             similarities.append((row[:-1], similarity))
 
         # Sort by similarity and apply limit
         similarities.sort(key=lambda x: x[1], reverse=True)
         if limit:
-            similarities = similarities[:int(limit)]
+            similarities = similarities[: int(limit)]
 
         result = [row for row, _ in similarities]
 
         if generate_proof:
-            circuit, proof = generate_proof_of_membership(
-                False, False, []
-            )
+            circuit, proof = generate_proof_of_membership(False, False, [])
             return result, circuit, proof
         return result
 
     def __del__(self):
-        if hasattr(self, 'conn'):
+        if hasattr(self, "conn"):
             self.conn.close()

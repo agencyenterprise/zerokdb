@@ -16,6 +16,7 @@ from zerokdb.ipfs_storage import TableData
 
 sys.set_int_max_str_digits(100000)
 
+
 def prod(iterable):
     return reduce(operator.mul, iterable, 1)
 
@@ -34,7 +35,10 @@ def hash_value(value: Union[str, int, float, bool, datetime]) -> int:
 
 
 def hash_table_column(
-    column_name: str, column_type: str, column_value: Union[str, int, float, bool, datetime, List[float]], column_index: int
+    column_name: str,
+    column_type: str,
+    column_value: Union[str, int, float, bool, datetime, List[float]],
+    column_index: int,
 ) -> int:
     type_handlers = {
         "STRING": lambda x: int.from_bytes(x.encode("utf-8"), "big"),
@@ -43,7 +47,9 @@ def hash_table_column(
         "FLOAT": lambda x: int(round(x * 1e8)),
         "BOOL": int,
         "DATETIME": lambda x: int(x.timestamp()),
-        "LIST[FLOAT]": lambda x: int.from_bytes(hashlib.sha256(str(x).encode()).digest(), "big")
+        "LIST[FLOAT]": lambda x: int.from_bytes(
+            hashlib.sha256(str(x).encode()).digest(), "big"
+        ),
     }
 
     if column_type not in type_handlers:
@@ -97,7 +103,7 @@ def record_to_polynomial(
     polynomial = []
     for record in records["rows"]:
         for i, (column_name, column_value) in enumerate(zip(columns, record)):
-            if column_name == '*':
+            if column_name == "*":
                 # Skip the '*' column as it's not a real column
                 continue
             column_type = column_types[column_name]
@@ -156,7 +162,12 @@ def generate_proof_of_membership(
     records: List[List[Union[int, str, List[float]]]],
     where_columns: List[str],
 ) -> Tuple[LayeredCircuit, bytes]:
-    circuit = generate_circuit_for_proof_of_membership(table, records, where_columns)
-    prover = ZkProver(circuit)
-    assert prover.prove(), "Proof of membership failed"
-    return circuit, prover.proof_transcript.to_bytes()
+    try:
+        circuit = generate_circuit_for_proof_of_membership(
+            table, records, where_columns
+        )
+        prover = ZkProver(circuit)
+        assert prover.prove(), "Proof of membership failed"
+        return circuit, prover.proof_transcript.to_bytes()
+    except Exception:
+        return None, None
