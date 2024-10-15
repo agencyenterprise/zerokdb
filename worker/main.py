@@ -19,13 +19,14 @@ load_dotenv()
 log_queue = queue.Queue()
 worker_running_event = threading.Event()  # Event to safely control the worker state
 
-# Redirect print to log_queue for Streamlit and console for CLI
-original_print = print
-def print(*args, **kwargs):
-    message = " ".join(map(str, args))
-    log_queue.put(message)
-    original_print(message, **kwargs)
-    sys.stdout.flush()  # Ensure real-time output in CLI
+# Custom Logger to Redirect Print Output
+class StreamlitLogger:
+    def write(self, message):
+        if message.strip():  # Avoid blank lines
+            log_queue.put(message.strip())
+
+    def flush(self):
+        pass  # No need to implement flush for our use case
 
 def start_worker(pina_api_key, wallet):
     """Start the worker and scheduling."""
@@ -66,7 +67,6 @@ def run_schedule():
     schedule.run_pending()
 
 def run_streamlit():
-    print("Starting Streamlit...")
     st.title("ZerokDB Worker Setup")
     st.subheader("Welcome to the ZerokDB Worker!")
     st.markdown('<br style="margin-bottom:16px">', unsafe_allow_html=True)
@@ -155,6 +155,7 @@ def run_cli(wallet, api_key):
         time.sleep(2) # Sleep to reduce the frequency of updates
 
 def main():
+    sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
     cli = os.environ.get('CLI')
     if cli:
         wallet = os.environ.get('WALLET_ADDRESS')
