@@ -1,8 +1,7 @@
 #!/bin/sh
 
 # Configuration variables
-WORKER_IMAGE="gpmaestri/zerokdb-client-worker:1.0.1"
-WORKER_CONTAINER_NAME="zerokdb-client-worker"
+WORKER_IMAGE="gpmaestri/zerokdb-client-worker:latest"
 
 # Function to check Docker status
 check_docker_status() {
@@ -58,7 +57,7 @@ esac
 
 # Prepare Docker run command
 docker_run_cmd="docker run -d -p 8502:8502"
-docker_run_cmd="$docker_run_cmd --name $WORKER_CONTAINER_NAME $WORKER_IMAGE"
+docker_run_cmd="$docker_run_cmd $WORKER_IMAGE"
 
 # Pull the latest Docker image
 echo "Pulling the latest worker Docker image..."
