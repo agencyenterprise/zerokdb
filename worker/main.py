@@ -4,7 +4,6 @@ import base64
 import threading
 import queue
 import time
-import argparse
 import logging
 from dotenv import load_dotenv
 from Crypto.PublicKey import RSA
@@ -21,24 +20,29 @@ load_dotenv()
 log_queue = queue.Queue()
 worker_running_event = threading.Event()  # Event to safely control the worker state
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-logger = logging.getLogger(__name__)
+# Redirect print to logger
+original_print = print
+def print(*args, **kwargs):
+    logger.info(" ".join(map(str, args)))
+    original_print(*args, **kwargs)
 
-# Redirect log messages to log_queue as well
-class QueueHandler(logging.Handler):
+# Custom Logger to Redirect Print Output
+class StreamlitLogger(logging.StreamHandler):
+    def __init__(self, log_queue, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_queue = log_queue
+
     def emit(self, record):
         log_entry = self.format(record)
-        log_queue.put(log_entry)
+        self.log_queue.put(log_entry)
+        super().emit(record)
+        sys.stdout.flush()
 
-# Add QueueHandler to logger
-queue_handler = QueueHandler()
-logger.addHandler(queue_handler)
-
-# Redirect all print statements to the logger
-def print(*args, **kwargs):
-    message = ' '.join(map(str, args))
-    logger.info(message)
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+streamlit_logger = StreamlitLogger(log_queue)
+logger.addHandler(streamlit_logger)
 
 def start_worker(pina_api_key, wallet):
     """Start the worker and scheduling."""
@@ -76,10 +80,10 @@ def stop_worker():
 
 def run_schedule():
     """Run pending scheduled jobs."""
-    logger.info("Running scheduled...")
     schedule.run_pending()
 
 def run_streamlit():
+    logger.info("Starting Streamlit...")
     st.title("ZerokDB Worker Setup")
     st.subheader("Welcome to the ZerokDB Worker!")
     st.markdown('<br style="margin-bottom:16px">', unsafe_allow_html=True)
@@ -162,16 +166,16 @@ def run_streamlit():
 def run_cli(wallet, api_key):
     logger.info(f"Starting worker in CLI mode with wallet: {wallet}")
     start_worker(api_key, wallet)
+
     while True:
         run_schedule()
         while not log_queue.empty():
             log_message = log_queue.get()
-            logger.info(log_message)
-        time.sleep(2)  # Sleep to reduce the frequency of updates
+            print(log_message)
+        time.sleep(1)
 
 def main():
     cli = os.environ.get('CLI')
-
     if cli:
         wallet = os.environ.get('WALLET_ADDRESS')
         api_key = os.environ.get('PINATA_API_KEY')
