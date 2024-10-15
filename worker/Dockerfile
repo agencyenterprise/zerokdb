@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     net-tools \
     dos2unix \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry

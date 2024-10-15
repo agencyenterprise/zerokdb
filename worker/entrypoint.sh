@@ -4,11 +4,11 @@
 update_repo() {
     if [ ! -d "/app/zerokdb" ]; then
         echo "Cloning repository..."
-        git clone -b feature/50b-209-deploy-final-version-of-worker-on-akash https://github.com/agencyenterprise/zerokdb.git /app/zerokdb
+        git clone -b main https://github.com/agencyenterprise/zerokdb.git /app/zerokdb
     else
         echo "Repository already cloned. Pulling latest changes..."
         cd /app/zerokdb || exit 1
-        git pull origin feature/50b-209-deploy-final-version-of-worker-on-akash
+        git pull origin main
     fi
 }
 
@@ -17,6 +17,7 @@ build_app() {
     echo "Building the application..."
     cd /app/zerokdb/worker || exit 1
     poetry config virtualenvs.create false
+    poetry lock
     poetry install --no-root --no-interaction --no-ansi
     chmod +x /app/zerokdb/worker/update_streamlit.sh
     /app/zerokdb/worker/update_streamlit.sh
@@ -56,15 +57,15 @@ while true; do
 
     echo "Checking for repository updates..."
     cd /app/zerokdb || exit 1
-    git fetch origin feature/50b-209-deploy-final-version-of-worker-on-akash
+    git fetch origin main
 
     LOCAL=$(git rev-parse HEAD)
-    REMOTE=$(git rev-parse origin/feature/50b-209-deploy-final-version-of-worker-on-akash)
+    REMOTE=$(git rev-parse origin/main)
 
     if [ "$LOCAL" != "$REMOTE" ]; then
         echo "New changes detected. Updating application..."
         stop_app
-        git pull origin feature/50b-209-deploy-final-version-of-worker-on-akash
+        git pull origin main
         build_app
         start_app
     else
