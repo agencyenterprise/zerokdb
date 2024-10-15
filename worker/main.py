@@ -5,6 +5,7 @@ import threading
 import queue
 import time
 import argparse
+import logging
 from dotenv import load_dotenv
 from Crypto.PublicKey import RSA
 import schedule
@@ -20,52 +21,62 @@ load_dotenv()
 log_queue = queue.Queue()
 worker_running_event = threading.Event()  # Event to safely control the worker state
 
-# Custom Logger to Redirect Print Output
-class StreamlitLogger:
-    def write(self, message):
-        if message.strip():  # Avoid blank lines
-            log_queue.put(message.strip())
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+logger = logging.getLogger(__name__)
 
-    def flush(self):
-        pass  # No need to implement flush for our use case
+# Redirect log messages to log_queue as well
+class QueueHandler(logging.Handler):
+    def emit(self, record):
+        log_entry = self.format(record)
+        log_queue.put(log_entry)
+
+# Add QueueHandler to logger
+queue_handler = QueueHandler()
+logger.addHandler(queue_handler)
+
+# Redirect all print statements to the logger
+def print(*args, **kwargs):
+    message = ' '.join(map(str, args))
+    logger.info(message)
 
 def start_worker(pina_api_key, wallet):
     """Start the worker and scheduling."""
     global auth_public_key, auth_private_key
-    print("Starting worker...")
+    logger.info("Starting worker...")
 
     # Generate RSA keys
     key = RSA.generate(2048)
     auth_private_key = key.export_key()
     auth_public_key = key.publickey().export_key()
 
-    print(f"Worker public key: {base64.b64encode(auth_public_key).decode()}", flush=True)
+    logger.info(f"Worker public key: {base64.b64encode(auth_public_key).decode()}")
 
     # Register worker
-    print('Worker registration initiated...', flush=True)
+    logger.info('Worker registration initiated...')
     signature_message_id, worker_id, signature = register(auth_public_key, auth_private_key, wallet)
-    print(f'Worker {worker_id} registered successfully.', flush=True)
+    logger.info(f'Worker {worker_id} registered successfully.')
 
     # Schedule jobs
-    print("Starting jobs...", flush=True)
+    logger.info("Starting jobs...")
     schedule.every(5).seconds.do(process_designated_proof_requests, signature_message_id, signature, pina_api_key)
 
 def stop_worker():
     """Stop the worker and clear the scheduled jobs."""
-    print("Stopping worker...")
+    logger.info("Stopping worker...")
     if 'st' in globals():
         st.session_state.worker_running = False
         st.session_state.log_messages = []
 
     schedule.clear()
     worker_running_event.clear()
-    print("Jobs stopped.")
+    logger.info("Jobs stopped.")
     if 'st' in globals():
         st.rerun()
 
 def run_schedule():
     """Run pending scheduled jobs."""
-    print("Running scheduled...")
+    logger.info("Running scheduled...")
     schedule.run_pending()
 
 def run_streamlit():
@@ -121,10 +132,10 @@ def run_streamlit():
             if button_area.button("Start Worker"):
                 if wallet_address and pinata_api_key:
                     st.session_state.worker_running = True
-                    print(f"Using wallet address: {wallet_address}")
+                    logger.info(f"Using wallet address: {wallet_address}")
                     start_worker(pinata_api_key, wallet_address)
                 else:
-                    print("Please enter a valid wallet address and Pinata API Key!!!")
+                    logger.info("Please enter a valid wallet address and Pinata API Key!!!")
         else:
             # Stop Worker Button
             if button_area.button("Stop Worker"):
@@ -149,30 +160,25 @@ def run_streamlit():
         st.rerun()
 
 def run_cli(wallet, api_key):
-    print(f"Starting worker in CLI mode with wallet: {wallet}")
-
+    logger.info(f"Starting worker in CLI mode with wallet: {wallet}")
     start_worker(api_key, wallet)
     while True:
         run_schedule()
         while not log_queue.empty():
             log_message = log_queue.get()
-            print(time.ctime(), log_message)
+            logger.info(log_message)
         time.sleep(2)  # Sleep to reduce the frequency of updates
 
 def main():
-    sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
-
     cli = os.environ.get('CLI')
 
     if cli:
-
         wallet = os.environ.get('WALLET_ADDRESS')
         api_key = os.environ.get('PINATA_API_KEY')
         if not wallet or not api_key:
-            print("Error: Both wallet address and API key are required for CLI mode.")
+            logger.error("Error: Both wallet address and API key are required for CLI mode.")
             sys.exit(1)
         run_cli(wallet, api_key)
-
     else:
         run_streamlit()
 
