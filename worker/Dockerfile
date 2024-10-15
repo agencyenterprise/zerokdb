@@ -1,6 +1,9 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12.4-slim as runner
 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 # Set the working directory inside the container
 WORKDIR /app
 
@@ -10,28 +13,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     libpq-dev \
+    net-tools \
+    dos2unix \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Clone the zerokdb repository
-RUN git clone https://github.com/agencyenterprise/zerokdb.git
+# Copy entrypoint script into the container
+COPY entrypoint.sh /app/entrypoint.sh
 
-# Navigate to the worker directory
-WORKDIR /app/zerokdb/worker
+# Convert line endings to Unix format
+RUN dos2unix /app/entrypoint.sh
 
-# Disable Poetry virtual environments
-RUN poetry config virtualenvs.create false
-
-# Install Python dependencies using Poetry (without virtualenvs)
-RUN poetry install --no-root --no-interaction --no-ansi
-
-# Modify Streamlit's cli.py (Ensure Streamlit is installed)
-COPY update_streamlit.sh .
-RUN chmod +x update_streamlit.sh && \
-    ./update_streamlit.sh
+# Make the entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
 
 # Expose port 8502 for the application
 EXPOSE 8502
@@ -40,5 +38,5 @@ EXPOSE 8502
 ENV HUB_URL=https://g1cqd9cf69e1b0tj8fd7o85mdg.ingress.akashprovid.com
 ENV API_HOST=https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org
 
-# Set the default command
-CMD ["sh", "-c", "if [ -n \"$WALLET_ADDRESS\" ] && [ -n \"$PINATA_API_KEY\" ]; then python run_main.py --cli; else python run_main.py; fi"]
+# Set the entrypoint with the full path inside /app
+ENTRYPOINT ["/app/entrypoint.sh"]

@@ -84,6 +84,8 @@ python --version
 
 ## Running the Application
 
+Set the env variables for Wallet, Pinata and CLI if you want to run without a GUI only on the CLI
+
 ```bash
 python run_main.py
 ```
