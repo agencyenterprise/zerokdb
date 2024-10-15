@@ -1,6 +1,9 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12.4-slim as runner
 
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 # Set the working directory inside the container
 WORKDIR /app
 
