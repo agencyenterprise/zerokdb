@@ -1,6 +1,5 @@
 import os
 import time
-
 from zerok.verifier.verifier import ZkVerifier
 
 from zerokdb.api import DatabaseAPI
@@ -29,7 +28,9 @@ def create_db_api_file():
 
 
 def create_db_api_ipfs():
-    return DatabaseAPI(storage_type="ipfs", pinata_api_key='test', api_host='http://localhost:8001')
+    return DatabaseAPI(
+        storage_type="ipfs", pinata_api_key="test", api_host="http://localhost:8001"
+    )
 
 
 def test_create_table():
@@ -116,7 +117,11 @@ def test_convert_text_to_embedding():
 
 
 def test_sql_embedding_search_ipfs():
-    storage = EnhancedFileStorage("embeddings_test_db", api_host="https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org", pinata_api_key="test")
+    storage = EnhancedFileStorage(
+        "embeddings_test_db",
+        api_host="https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org",
+        pinata_api_key="test",
+    )
     db = SimpleSQLDatabase(storage)
     table_name = f"vectors{int(time.time())}"
     # Create a table with a vector column
@@ -134,7 +139,9 @@ def test_sql_embedding_search_ipfs():
     )
 
     # Check if the result is as expected
-    assert result == [(1, '[0.1, 0.2, 0.3]')], f"Expected [(1, '[0.1, 0.2, 0.3]')], but got {result}"
+    assert result == [
+        (1, "[0.1, 0.2, 0.3]")
+    ], f"Expected [(1, '[0.1, 0.2, 0.3]')], but got {result}"
 
 
 def test_sql_embedding_search_ipfs_with_text():

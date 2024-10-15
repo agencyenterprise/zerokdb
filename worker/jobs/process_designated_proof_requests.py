@@ -5,7 +5,10 @@ from services.proof_service import generate_proof
 import base64
 import dill
 
-def process_designated_proof_requests(signature_message_id: bytes, signature: str, pinata_api_key: str):
+
+def process_designated_proof_requests(
+    signature_message_id: bytes, signature: str, pinata_api_key: str
+):
     print("Fetching designated proof requests...")
 
     try:

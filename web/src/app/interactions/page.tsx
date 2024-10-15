@@ -71,8 +71,8 @@ export default function InteractionsPage() {
     const table = faker.food.adjective().replaceAll(" ", "_").toLowerCase();
     const example = `
 CREATE TABLE ${table} (
-  id int,
-  name string
+  id INT,
+  name STRING
 );
       `;
     setFormData({ ...formData, sql: example, semantic: "", table: "" });
