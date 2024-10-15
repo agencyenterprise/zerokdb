@@ -65,10 +65,10 @@ def stop_worker():
 
 def run_schedule():
     """Run pending scheduled jobs."""
+    print("Running scheduled...")
     schedule.run_pending()
 
 def run_streamlit():
-    sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
     st.title("ZerokDB Worker Setup")
     st.subheader("Welcome to the ZerokDB Worker!")
     st.markdown('<br style="margin-bottom:16px">', unsafe_allow_html=True)
@@ -150,12 +150,17 @@ def run_streamlit():
 
 def run_cli(wallet, api_key):
     print(f"Starting worker in CLI mode with wallet: {wallet}")
+
     start_worker(api_key, wallet)
     while True:
         run_schedule()
-        time.sleep(1)
+        while not log_queue.empty():
+            log_message = log_queue.get()
+            print(time.ctime(), log_message)
+        time.sleep(2)  # Sleep to reduce the frequency of updates
 
 def main():
+    sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
 
     cli = os.environ.get('CLI')
 
