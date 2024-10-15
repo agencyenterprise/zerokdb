@@ -36,6 +36,8 @@ class SimpleSQLDatabase:
         )
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
 
+        print(table_data)
+
         if table_data["rows"]:
             placeholders = ", ".join(["?" for _ in table_data["columns"]])
             self.cursor.execute(f"DELETE FROM {table_name}")
@@ -76,7 +78,7 @@ class SimpleSQLDatabase:
             self.conn.commit()
             print(f"Inserted data locally in {time.time() - start} seconds")
 
-            new_table_chunk = {table_name: self._get_table_data(table_name)}
+            new_table_chunk = self._get_newly_inserted_data(table_name, query)
             self.storage.save(new_table_chunk, table_name)
 
             print(f"Saved updated data on IPFS in {time.time() - start} seconds")
@@ -147,6 +149,56 @@ class SimpleSQLDatabase:
             columns = match.group(1).split(",")
             return [col.strip() for col in columns]
         return []
+
+    def _get_newly_inserted_data(self, table_name: str, query: str):
+        # Extract the columns and values from the INSERT INTO query
+        match = re.search(r"INSERT INTO\s+\w+\s*\((.+?)\)\s*VALUES\s*\((.+?)\)", query, re.IGNORECASE)
+        if not match:
+            raise ValueError("Could not extract data from INSERT INTO query")
+
+        columns = [col.strip() for col in match.group(1).split(",")]
+        values_str = match.group(2)
+
+        # Handle the case where a value might contain commas (e.g., in a vector or text)
+        values = []
+        in_brackets = False
+        in_quotes = False
+        current_value = ""
+        for char in values_str:
+            if char == '[':
+                in_brackets = True
+            elif char == ']':
+                in_brackets = False
+            elif char == "'":
+                in_quotes = not in_quotes
+
+            if char == ',' and not (in_brackets or in_quotes):
+                values.append(current_value.strip().strip("'"))
+                current_value = ""
+            else:
+                current_value += char
+
+        if current_value:
+            values.append(current_value.strip().strip("'"))
+
+        # Get the column types
+        self.cursor.execute(f"PRAGMA table_info({table_name})")
+        columns_info = self.cursor.fetchall()
+        column_types = {col[1]: col[2] for col in columns_info}
+
+        # Create the new_table_chunk with only the newly inserted data
+        new_table_chunk = {
+            table_name: {
+                "columns": columns,
+                "column_types": {col: column_types.get(col, 'TEXT') for col in columns},
+                "rows": [tuple(values)],
+                "indexes": {},
+            }
+        }
+
+        print(new_table_chunk)
+
+        return new_table_chunk
 
     def _handle_cosine_similarity_query(self, query: str, generate_proof: bool):
         match = re.match(

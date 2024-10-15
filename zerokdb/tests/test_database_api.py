@@ -97,15 +97,27 @@ def test_execute_query_with_proof():
     assert verifier.run_verifier(proof)
 
 
-def test_execute_query_ipfs():
+def test_execute_query_ipfs_twice():
     db_api = create_db_api_ipfs()
     table_name = f"users{int(time.time())}"
     db_api.create_table(table_name, {"id": "INT", "name": "STRING"})
     db_api = create_db_api_ipfs()
     db_api.insert_into(table_name, {"id": 1, "name": "Alice"})
+
+    db_api = create_db_api_ipfs()
+    db_api.insert_into(table_name, {"id": 2, "name": "Bob"})
+
     db_api = create_db_api_ipfs()
     result = db_api.execute_query(f"SELECT name FROM {table_name} WHERE id = 1")
     assert result == [("Alice",)]
+
+    db_api = create_db_api_ipfs()
+    result = db_api.execute_query(f"SELECT name FROM {table_name} WHERE id = 2")
+    assert result == [("Bob",)]
+
+    db_api = create_db_api_ipfs()
+    result = db_api.execute_query(f"SELECT name FROM {table_name}")
+    assert result == [("Alice",), ("Bob",)]
 
 
 def test_convert_text_to_embedding():
