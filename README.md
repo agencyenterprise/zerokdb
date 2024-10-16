@@ -20,6 +20,9 @@ The ZeroKDB Platform is designed to facilitate decentralized data management by 
 
 ## Architecture
 
+
+<img width="2432" alt="zerokdbarch" src="https://github.com/user-attachments/assets/458f51dd-b89d-4e4d-b0cf-3c6e836069f2">
+
 The ZeroKDB Platform is all deployed on Akash for decentralization and reliability and it comprises four main components:
 
 ### Components
