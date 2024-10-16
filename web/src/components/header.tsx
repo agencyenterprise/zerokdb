@@ -11,10 +11,11 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "DB Interactions", href: "/interactions" },
-  { name: "Interactions History", href: "/interactions-history" },
-  { name: "Buy credits", href: "/buy" },
+  { name: "zerokDB Explorer", href: "/interactions" },
+  // { name: "Interactions History", href: "/interactions-history" },
+  // { name: "Buy credits", href: "/buy" },
   { name: "Run a Node", href: "/#node" },
+  { name: "Network Stats", href: "https://ihsillnj1d9ub5778jt3ooqos8.ingress.akashprovid.com/" },
 ];
 
 export default function Example() {
@@ -23,15 +24,52 @@ export default function Example() {
   return (
     <header className="fixed z-10 left-0 right-0 top-0 bg-tertiary-900">
       <nav
-        className="mx-auto flex max-w-7xl items-center justify-between p-4 px-6"
+        className="flex  items-center justify-between p-4 px-6"
         aria-label="Global"
       >
-        <div className="hidden sm:flex">
-          <Link href="/">
-            <span className="sr-only">ZeroK</span>
-            <Image width={130} height={130} src="/logo.svg" alt="" />
-          </Link>
+        {/* Left side: Logo and navigation links */}
+        <div className="flex items-center">
+          <div className="hidden sm:flex mr-8">
+            <Link href="/">
+              <span className="sr-only">ZeroK</span>
+              <Image width={130} height={130} src="/logodb.svg" alt="" />
+            </Link>
+          </div>
+          <div className="hidden lg:flex lg:gap-x-8">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="text-md font-semibold leading-6 text-secondary-100 hover:text-primary-500"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
         </div>
+
+        {/* Right side: Credits, Wallet, and GitHub icon */}
+        <div className="hidden lg:flex items-center">
+          <Link
+            href="/buy"
+            className="text-md font-semibold leading-6 text-secondary-100 hover:text-primary-500 mr-8"
+          >
+            Buy credits
+          </Link>
+          <Wallet />
+          <div className="ml-4">
+            <a
+              href="https://github.com/agencyenterprise/zerokdb"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <FontAwesomeIcon icon={faGithub} size="2x" />
+            </a>
+          </div>
+        </div>
+
+        {/* Mobile menu button */}
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -41,30 +79,6 @@ export default function Example() {
             <span className="sr-only">Open main menu</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
-        </div>
-        <div className="hidden ml-8 lg:flex lg:gap-x-8">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="text-md font-semibold leading-6 text-secondary-100 hover:text-primary-500"
-            >
-              {item.name}
-            </Link>
-          ))}
-        </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Wallet />
-        </div>
-        <div className="hidden lg:flex lg:flex-2 lg:justify-end ml-4">
-          <a
-            href="https://github.com/agencyenterprise/zerokdb"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors duration-300"
-          >
-            <FontAwesomeIcon icon={faGithub} size="2x" />
-          </a>
         </div>
       </nav>
       <Dialog

@@ -68,53 +68,45 @@ export default function InteractionsHistoryPage() {
 
   const RequestsList = () => {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
-        {requests.map((request, index) => {
-          const payload =
-            request?.ai_model_output && JSON.parse(request.ai_model_output);
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-secondary-100">
+          <thead>
+            <tr className="bg-tertiary-700">
+              <th className="py-2 px-4 text-left">Query</th>
+              <th className="py-2 px-4 text-left">Status</th>
+              <th className="py-2 px-4 text-left">Type</th>
+              <th className="py-2 px-4 text-left">Worker</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.map((request, index) => {
+              const input = request?.ai_model_inputs && JSON.parse(request.ai_model_inputs);
 
-          const input =
-            request?.ai_model_inputs && JSON.parse(request.ai_model_inputs);
-
-          return (
-            <div
-              key={index}
-              className="flex flex-col p-4 bg-tertiary-800 border border-secondary-500 rounded-lg shadow hover:bg-tertiary-700 w-full cursor-pointer gap-2"
-              onClick={() => setSelectedRequest(request)}
-            >
-              <h4 className="text-left mb-1 text-lg font-bold tracking-tight text-secondary-100">
-                {request.name}
-              </h4>
-
-              <p className="text-left text-sm text-secondary-200">
-                {`Status: ${request.status}`}
-              </p>
-              {input?.type && (
-                <p className="text-left text-sm text-secondary-200">
-                  {`Type: ${input.type}`}
-                </p>
-              )}
-              <p className="text-left text-sm text-secondary-200">
-                {request.description}
-              </p>
-              {request?.worker_wallet && request?.worker_wallet !== "None" && (
-                <p className="text-left text-sm text-secondary-200">
-                  Paid to worker:{" "}
-                  <Link
-                    href={`https://explorer.aptoslabs.com/account/${request.worker_wallet}?network=testnet`}
-                    target="_blank"
-                    className="underline text-primary-500 hover:text-primary-400"
-                  >
-                    {`${request.worker_wallet.slice(
-                      0,
-                      6,
-                    )}...${request.worker_wallet.slice(-4)}`}
-                  </Link>
-                </p>
-              )}
-            </div>
-          );
-        })}
+              return (
+                <tr
+                  key={index}
+                  className="hover:bg-tertiary-700 cursor-pointer"
+                  onClick={() => setSelectedRequest(request)}
+                >
+                  <td className="py-2 px-4 border-b border-secondary-500">{request.name}</td>
+                  <td className="py-2 px-4 border-b border-secondary-500">{request.status}</td>
+                  <td className="py-2 px-4 border-b border-secondary-500">{input?.type || '-'}</td>
+                  <td className="py-2 px-4 border-b border-secondary-500">
+                    {request?.worker_wallet && request?.worker_wallet !== "None" ? (
+                      <Link
+                        href={`https://explorer.aptoslabs.com/account/${request.worker_wallet}?network=testnet`}
+                        target="_blank"
+                        className="underline text-primary-500 hover:text-primary-400"
+                      >
+                        {`${request.worker_wallet.slice(0, 6)}...${request.worker_wallet.slice(-4)}`}
+                      </Link>
+                    ) : '-'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   };
@@ -207,7 +199,7 @@ export default function InteractionsHistoryPage() {
 
   return (
     <div className="bg-tertiary-900 py-12 sm:py-24 min-h-screen">
-      <div className="mx-auto w-full sm:max-w-2xl px-4">
+      <div className="mx-auto w-full px-4 sm:max-w-7xl">
         <div className="mx-auto max-w-4xl text-center py-8">
           <h2 className="text-2xl font-bold tracking-tight text-secondary-100 sm:text-4xl">
             Request History

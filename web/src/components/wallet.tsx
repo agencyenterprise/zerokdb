@@ -8,7 +8,7 @@ function WalletConnector() {
   return (
     <>
       <div className="flex flex-row items-center gap-3">
-        <p className="font-bold">Credit: {escrowBalance || 0}</p>
+        <p className="font-bold">Credits: {escrowBalance || 0}</p>
         <WalletSelector />
       </div>
     </>
