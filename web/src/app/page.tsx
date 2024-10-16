@@ -40,7 +40,7 @@ export default function Home() {
       icon: faDatabase,
       title: "Connect to ZerokDB",
       description:
-        "Use our SDK or interface to connect to ZerokDB on the APTOS network.",
+        "Use our SDK or interface to connect to ZerokDB on Aptos.",
     },
     {
       icon: faUpload,
@@ -109,7 +109,7 @@ export default function Home() {
       <div className="relative mx-auto max-w-3xl py-16 sm:pt-48 sm:pb-36 px-2 text-secondary-100">
         <div className="hidden sm:mb-8 sm:flex sm:justify-center">
           <div className="relative rounded-full px-3 py-1 text-md leading-6 text-secondary-400 ring-1 ring-tertiary-600 hover:ring-tertiary-400">
-            ZerokDB for APTOS Chain Testnet is live!{" "}
+            ZerokDB for Aptos Testnet is live!{" "}
             <Link
               target="_blank"
               href="https://github.com/agencyenterprise/zerokdb"
@@ -124,19 +124,19 @@ export default function Home() {
           <h1 className="text-2xl font-bold tracking-tight sm:text-5xl">
             A{" "}
             <span className="text-primary-500">blockchain-based database</span>{" "}
-            on APTOS network
+            on Aptos
           </h1>
           <h2 className="text-xl sm:text-4xl">
             for verified queries and secure data storage
           </h2>
           <p className="mt-6 text-lg leading-8 text-white">
-            ZerokDB leverages the{" "}
+            ZerokDB leverages {" "}
             <Link
               target="_blank"
               className="text-primary-500 hover:text-primary-400"
               href="https://aptos.dev/"
             >
-              APTOS network
+              Aptos
             </Link>{" "}
             to run verified queries and save data directly on the blockchain and
             IPFS. By utilizing zero-knowledge proofs, we ensure trustless and
