@@ -15,6 +15,7 @@ const navigation = [
   // { name: "Interactions History", href: "/interactions-history" },
   // { name: "Buy credits", href: "/buy" },
   { name: "Run a Node", href: "/#node" },
+  { name: "Network Stats", href: "https://ihsillnj1d9ub5778jt3ooqos8.ingress.akashprovid.com/" },
 ];
 
 export default function Example() {
