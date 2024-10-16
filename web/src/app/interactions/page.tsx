@@ -68,7 +68,7 @@ export default function InteractionsPage() {
   };
 
   const handleTableExample = () => {
-    const table = faker.food.adjective().replaceAll(" ", "_").toLowerCase();
+    const table = faker.food.adjective().replaceAll(" ", "_").toLowerCase() + faker.number.int();
     const example = `
 CREATE TABLE ${table} (
   id INT,
