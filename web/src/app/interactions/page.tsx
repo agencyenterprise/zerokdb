@@ -350,13 +350,13 @@ CREATE TABLE ${table} (
             <div>
               <h3 className="text-lg font-semibold text-secondary-100 mb-2">AI Model Inputs</h3>
               <pre className="bg-tertiary-700 p-4 rounded-lg overflow-x-auto text-secondary-200 text-sm mb-4 whitespace-pre-wrap break-words">
-                {JSON.stringify(JSON.parse(selectedHistoryItem.ai_model_inputs), null, 2)}
+                {selectedHistoryItem.ai_model_inputs && JSON.stringify(JSON.parse(selectedHistoryItem.ai_model_inputs), null, 2)}
               </pre>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-secondary-100 mb-2">AI Model Output</h3>
               <pre className="bg-tertiary-700 p-4 rounded-lg overflow-x-auto text-secondary-200 text-sm mb-4 whitespace-pre-wrap break-words">
-                {JSON.stringify(JSON.parse(selectedHistoryItem?.ai_model_output), null, 2)}
+                {selectedHistoryItem?.ai_model_output && JSON.stringify(JSON.parse(selectedHistoryItem?.ai_model_output), null, 2)}
               </pre>
             </div>
             {selectedHistoryItem.proof ? (
