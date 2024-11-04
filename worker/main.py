@@ -155,7 +155,6 @@ def run_cli(wallet, api_key):
         time.sleep(2) # Sleep to reduce the frequency of updates
 
 def main():
-    sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
     cli = os.environ.get('CLI')
     if cli:
         wallet = os.environ.get('WALLET_ADDRESS')
@@ -165,6 +164,7 @@ def main():
             sys.exit(1)
         run_cli(wallet, api_key)
     else:
+        sys.stdout = StreamlitLogger()  # Redirect stdout to the custom logger
         run_streamlit()
 
 if __name__ == "__main__":
