@@ -1,8 +1,8 @@
 import base64
-import os
 
 from services.hub_service import call_hub_post
 from services.signature_service import sign_message
+
 
 def register(public_key: bytes, private_key: bytes, wallet: str):
   try:
@@ -18,8 +18,12 @@ def register(public_key: bytes, private_key: bytes, wallet: str):
         'wallet': wallet,
         'chain': 'aptos_testnet'
       }],
-      'ai_models': ['zerokdb']
+      'ai_models': [{
+        'name': 'zerokdb',
+        'version': 'v1'
+      }]
     }
+
     worker_headers = {
       'signature-message-id': message_response['id'],
       'signature': signature,
