@@ -14,7 +14,7 @@ def create_db_api_file():
     except FileNotFoundError:
         pass
 
-    db_api = DatabaseAPI(storage_type="file", storage_location="test_db.json")
+    db_api = DatabaseAPI(storage_type="file", storage_location="test_db.json", chain="aptos")
 
     # Delete all tables in SQLite
     cursor = db_api.db.conn.cursor()
@@ -29,7 +29,7 @@ def create_db_api_file():
 
 def create_db_api_ipfs():
     return DatabaseAPI(
-        storage_type="ipfs", pinata_api_key="test", api_host="http://localhost:8001"
+        storage_type="ipfs", pinata_api_key="test", api_host="http://localhost:8001", chain="aptos"
     )
 
 
@@ -133,6 +133,7 @@ def test_sql_embedding_search_ipfs():
         "embeddings_test_db",
         api_host="https://kumh6ogteddmj4pgtuh7p00k9c.ingress.akash-palmito.org",
         pinata_api_key="test",
+        chain="aptos",
     )
     db = SimpleSQLDatabase(storage)
     table_name = f"vectors{int(time.time())}"

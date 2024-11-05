@@ -41,7 +41,8 @@ async def generate_proof(
     db_api = DatabaseAPI(
         storage_type="ipfs",
         pinata_api_key=pina_api_key,
-        api_host=os.getenv("API_HOST") or "http://localhost:8001"
+        api_host=os.getenv("API_HOST") or "http://localhost:8001",
+        chain="aptos",
     )
     ai_model_inputs_dict = json.loads(ai_model_inputs)
 

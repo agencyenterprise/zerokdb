@@ -14,7 +14,7 @@ async def generate_proof(
         return None, None
 
     try:
-        db_api = DatabaseAPI(storage_type="ipfs", pinata_api_key=pinata_api_key, api_host=api_host)
+        db_api = DatabaseAPI(storage_type="ipfs", pinata_api_key=pinata_api_key, api_host=api_host, chain="aptos")
         ai_model_inputs_dict = json.loads(ai_model_inputs)
 
         if ai_model_inputs_dict["type"] == "TEXT":

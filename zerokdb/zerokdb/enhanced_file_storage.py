@@ -4,10 +4,11 @@ from typing import Dict, Any
 
 
 class EnhancedFileStorage:
-    def __init__(self, filename, api_host, pinata_api_key):
+    def __init__(self, filename, api_host, pinata_api_key, chain):
         self.filename = filename
         self.api_host = api_host
         self.pinata_api_key = pinata_api_key
+        self.chain = chain
 
     def save(self, data, table_name):
         """
@@ -20,7 +21,7 @@ class EnhancedFileStorage:
         Get the CID sequence by querying the REST API at zerokdbapi.
         """
         url = f"{self.api_host}/sequence/name"
-        response = requests.post(url, json={"entity_name": table_name}, headers={"chain": "aptos"})
+        response = requests.post(url, json={"entity_name": table_name}, headers={"chain": self.chain})
         if response.status_code == 200:
             return response.json()
         else:
@@ -31,7 +32,7 @@ class EnhancedFileStorage:
         Call the POST /entity endpoint to create a new table.
         """
         url = f"{self.api_host}/entity"
-        response = requests.post(url, json={"entity_name": entity_name, "data": data}, headers={"chain": "aptos"})
+        response = requests.post(url, json={"entity_name": entity_name, "data": data}, headers={"chain": self.chain})
         if response.status_code == 200:
             return response.json()
         else:
@@ -66,7 +67,7 @@ class EnhancedFileStorage:
         Call the REST API at zerokdbapi to append data.
         """
         url = f"{self.api_host}/append-data"
-        response = requests.post(url, json={"data": data, "table_name": table_name}, headers={"chain": "aptos"})
+        response = requests.post(url, json={"data": data, "table_name": table_name}, headers={"chain": self.chain})
         if response.status_code == 200:
             return response.json()
         else:
