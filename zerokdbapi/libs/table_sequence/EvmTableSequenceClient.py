@@ -1,6 +1,6 @@
 import os
 from typing import Tuple
-from zerokdbapi.libs.table_sequence.TableSequenceClient import TableSequenceClient
+from libs.table_sequence.TableSequenceClient import TableSequenceClient
 from web3 import Web3
 
 class EvmTableSequenceClient(TableSequenceClient):
