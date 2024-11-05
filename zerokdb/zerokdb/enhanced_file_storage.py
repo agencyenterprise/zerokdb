@@ -20,7 +20,7 @@ class EnhancedFileStorage:
         Get the CID sequence by querying the REST API at zerokdbapi.
         """
         url = f"{self.api_host}/sequence/name"
-        response = requests.post(url, json={"entity_name": table_name})
+        response = requests.post(url, json={"entity_name": table_name}, headers={"chain": "aptos"})
         if response.status_code == 200:
             return response.json()
         else:
@@ -31,7 +31,7 @@ class EnhancedFileStorage:
         Call the POST /entity endpoint to create a new table.
         """
         url = f"{self.api_host}/entity"
-        response = requests.post(url, json={"entity_name": entity_name, "data": data})
+        response = requests.post(url, json={"entity_name": entity_name, "data": data}, headers={"chain": "aptos"})
         if response.status_code == 200:
             return response.json()
         else:
@@ -66,7 +66,7 @@ class EnhancedFileStorage:
         Call the REST API at zerokdbapi to append data.
         """
         url = f"{self.api_host}/append-data"
-        response = requests.post(url, json={"data": data, "table_name": table_name})
+        response = requests.post(url, json={"data": data, "table_name": table_name}, headers={"chain": "aptos"})
         if response.status_code == 200:
             return response.json()
         else:

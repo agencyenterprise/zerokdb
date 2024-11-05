@@ -2,10 +2,13 @@ import json
 import os
 from typing import Any, Dict
 
-import TableSequenceClient
+from libs.table_sequence.TableSequenceClient import TableSequenceClient
+from libs.table_sequence.AptosTableSequenceClient import AptosTableSequenceClient
+from libs.table_sequence.EvmTableSequenceClient import EvmTableSequenceClient
+
 from aptos_sdk.account import Account
 from config import settings
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from TextToEmbedding import TextToEmbedding
 
@@ -16,29 +19,30 @@ from dotenv import load_dotenv
 load_dotenv()
 app = FastAPI()
 
-
 class AppendDataPayload(BaseModel):
     data: Dict[str, Any]
     table_name: str
-
 
 class EntityPayload(BaseModel):
     entity_name: str
     data: Dict[str, Any]
 
-
 class EmbeddingPayload(BaseModel):
     text: str
-
 
 class EntityNamePayload(BaseModel):
     entity_name: str
 
+async def get_table_sequence_client(chain: str = Header(None)):
+    if chain == "evm":
+        node_url = os.getenv("EVM_NODE_URL")
+        return EvmTableSequenceClient(node_url)
 
-async def get_table_sequence_client():
-    node_url = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
-    return TableSequenceClient.TableSequenceClient(node_url)
+    if chain == "aptos":
+        node_url = os.getenv("APTOS_NODE_URL", "https://fullnode.testnet.aptoslabs.com/v1")
+        return AptosTableSequenceClient(node_url)
 
+    raise HTTPException(status_code=400, detail="Invalid chain")
 
 async def get_sender():
     return Account.load_key(os.getenv("APTOS_PRIVATE_KEY"))
@@ -77,7 +81,6 @@ async def get_cid_sequence_by_table_name(
         print('Error', e)
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/entity")
 async def create_entity(
     EntityPayload: EntityPayload,
@@ -107,7 +110,6 @@ async def create_entity(
         print('Error', e)
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/append-data")
 async def append_data_by_table_name(
     payload: AppendDataPayload,
@@ -133,7 +135,6 @@ async def append_data_by_table_name(
     except Exception as e:
         print('Error while appending data: ', e)
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.post("/convert-to-embedding")
 async def convert_to_embedding(payload: EmbeddingPayload):

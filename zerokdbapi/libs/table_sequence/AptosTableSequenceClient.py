@@ -1,6 +1,6 @@
 import os
 from typing import Tuple
-from zerokdbapi.libs.table_sequence.TableSequenceClient import TableSequenceClient
+from libs.table_sequence.TableSequenceClient import TableSequenceClient
 
 from aptos_sdk.account import Account
 from aptos_sdk.async_client import RestClient
